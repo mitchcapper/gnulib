@@ -1826,7 +1826,7 @@ func_lookup_file ()
     IFS="$PATH_SEPARATOR"
     for patchfile in $lkpatches; do
       IFS="$saved_IFS"
-      patch -s "$tmp/$lkbase" < "$patchfile" >&2 \
+      patch --ignore-whitespace -i "$patchfile" "$tmp/$lkbase" >&2 \
         || func_fatal_error "patch file $patchfile didn't apply cleanly"
     done
     IFS="$saved_IFS"
