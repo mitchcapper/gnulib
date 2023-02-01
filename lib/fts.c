@@ -123,6 +123,9 @@ static char sccsid[] = "@(#)fts.c       8.6 (Berkeley) 8/14/94";
 #ifndef S_IFSOCK
 # define S_IFSOCK 0
 #endif
+#ifndef S_IFBLK
+# define S_IFBLK 0
+#endif
 
 enum
 {
