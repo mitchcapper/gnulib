@@ -68,6 +68,7 @@ dirchownmod (int fd, char const *dir, mode_t mkdir_mode,
              uid_t owner, gid_t group,
              mode_t mode, mode_t mode_bits)
 {
+#ifndef _WIN32
   struct stat st;
   int result = (fd < 0 ? stat (dir, &st) : fstat (fd, &st));
 
@@ -144,4 +145,7 @@ dirchownmod (int fd, char const *dir, mode_t mkdir_mode,
     }
 
   return result;
+#else
+  return 0;
+#endif
 }

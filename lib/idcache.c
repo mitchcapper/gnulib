@@ -22,8 +22,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef _WIN32
 #include <pwd.h>
 #include <grp.h>
+#endif
 
 #include <unistd.h>
 
@@ -68,6 +70,13 @@ static struct userid *nogroup_alist;
 char *
 getuser (uid_t uid)
 {
+#ifdef _WIN32
+  const char * user = getenv("USERNAME");
+  char * ret = xmalloc ( (strlen (user) + 1)*sizeof(char));
+  strcpy (ret, user);
+  return ret;
+
+#else
   struct userid *tail;
   struct userid *match = NULL;
 
@@ -94,6 +103,7 @@ getuser (uid_t uid)
     }
 
   return match->name[0] ? match->name : NULL;
+  #endif
 }
 
 /* Translate USER to a UID, with cache.
@@ -104,6 +114,9 @@ getuser (uid_t uid)
 uid_t *
 getuidbyname (const char *user)
 {
+#ifdef _WIN32
+  return 2;
+#else
   struct userid *tail;
   struct passwd *pwent;
 
@@ -143,6 +156,7 @@ getuidbyname (const char *user)
   tail->next = nouser_alist;
   nouser_alist = tail;
   return NULL;
+#endif
 }
 
 /* Translate GID to a group name, with cache, or NULL if unresolved.  */
@@ -150,6 +164,12 @@ getuidbyname (const char *user)
 char *
 getgroup (gid_t gid)
 {
+#ifdef _WIN32
+  const char * group = "Users";
+    char * ret = xmalloc ( sizeof(char)  * ( strlen (group) + 1));
+    strcpy(ret, group);
+    return ret;
+#else
   struct userid *tail;
   struct userid *match = NULL;
 
@@ -176,6 +196,7 @@ getgroup (gid_t gid)
     }
 
   return match->name[0] ? match->name : NULL;
+  #endif
 }
 
 /* Translate GROUP to a GID, with cache.
@@ -186,6 +207,9 @@ getgroup (gid_t gid)
 gid_t *
 getgidbyname (const char *group)
 {
+  #ifdef _WIN32
+    return 2;
+  #else
   struct userid *tail;
   struct group *grent;
 
@@ -225,4 +249,5 @@ getgidbyname (const char *group)
   tail->next = nogroup_alist;
   nogroup_alist = tail;
   return NULL;
+  #endif
 }
