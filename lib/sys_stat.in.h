@@ -170,8 +170,9 @@ struct stat
 #   define st_ctime st_ctim.tv_sec
     /* Indicator, for gnulib internal purposes.  */
 #   define _GL_WINDOWS_STAT_TIMESPEC 1
-#  endif
+# else //must be in else otherwise it causes the timespec not to be declared by win even if it is 12 above
 #  define GNULIB_defined_struct_stat 1
+# endif
 # endif
 
 /* Other possible values of st_mode.  */
