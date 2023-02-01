@@ -24,8 +24,12 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <pwd.h>
 #include <grp.h>
+#else
+#include "idcache.h"
+#endif
 
 #if HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -96,7 +100,7 @@ is_number (const char *str)
   return true;
 }
 #endif
-
+#ifndef _WIN32
 static char const *
 parse_with_separator (char const *spec, char const *separator,
                       uid_t *uid, gid_t *gid,
@@ -284,15 +288,27 @@ parse_user_spec_warn (char const *spec, uid_t *uid, gid_t *gid,
     *pwarn = warn;
   return error_msg;
 }
-
+#endif
 /* Like parse_user_spec_warn, but generate only errors; no warnings.  */
 
 char const *
 parse_user_spec (char const *spec, uid_t *uid, gid_t *gid,
                  char **username, char **groupname)
 {
+#ifdef _WIN32
+  (*uid) = getuidbyname("");
+  (*gid) = getgidbyname("");
+  (*username) = getuser(2);
+  (*groupname) = getgroup(2);
+  return NULL;
+#else
   return parse_user_spec_warn (spec, uid, gid, username, groupname, NULL);
+#endif
 }
+#ifdef _WIN32
+uid_t geteuid (void) { return getuidbyname(""); }
+uid_t getegid (void) { return getgidbyname(""); }
+#endif
 
 #ifdef TEST
 
