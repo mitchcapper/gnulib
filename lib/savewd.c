@@ -87,7 +87,11 @@ savewd_save (struct savewd *wd)
           /* "Save" the initial working directory by forking a new
              subprocess that will attempt all the work from the chdir
              until the next savewd_restore.  */
+#ifndef _WIN32             
           wd->val.child = fork ();
+#else
+          assert(0);//should not get here in windows hopefully
+#endif
           if (wd->val.child != 0)
             {
               if (0 < wd->val.child)
@@ -221,8 +225,12 @@ savewd_restore (struct savewd *wd, int status)
         if (0 < child)
           {
             int child_status;
+#ifndef _WIN32
             while (waitpid (child, &child_status, 0) < 0)
               assure (errno == EINTR);
+#else
+            assert(0);//should not get here in windows hopefully
+#endif              
             wd->val.child = -1;
             if (! WIFEXITED (child_status))
               raise (WTERMSIG (child_status));
