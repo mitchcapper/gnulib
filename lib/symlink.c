@@ -40,7 +40,22 @@ rpl_symlink (char const *contents, char const *name)
         errno = EEXIST;
       return -1;
     }
-  return symlink (contents, name);
+#ifdef _WIN32
+  struct stat path_stat;
+  stat(contents, &path_stat);
+  DWORD flags = SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
+  if (path_stat.st_mode & _S_IFDIR)
+	  flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+
+  if (CreateSymbolicLink(name, contents, flags))
+	  return 0;
+
+  errno = GetLastError();
+  return -1;
+#else
+  return symlink(contents, name);
+#endif
+  
 }
 
 #else /* !HAVE_SYMLINK */

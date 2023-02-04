@@ -19,7 +19,16 @@ AC_DEFUN([gl_FUNC_SYMLINK],
   dnl that compilation can proceed with fewer ifdefs.  On FreeBSD 7.2, AIX 7.1,
   dnl and Solaris 9, we want to fix a bug with trailing slash handling.
   if test $ac_cv_func_symlink = no; then
-    HAVE_SYMLINK=0
+  case "$host_os" in
+
+  	  mingw*)
+  	  	REPLACE_SYMLINK=1
+  	  	HAVE_SYMLINK=1
+  	   ;;
+      *)
+        HAVE_SYMLINK=0
+        ;;
+	esac
   else
     AC_CACHE_CHECK([whether symlink handles trailing slash correctly],
       [gl_cv_func_symlink_works],
