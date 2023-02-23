@@ -15,7 +15,12 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
-
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include<handleapi.h>
+#include <stdio.h>
+#endif
 /* Specification.  */
 #include <spawn.h>
 
@@ -42,7 +47,15 @@ posix_spawn_file_actions_addclose (posix_spawn_file_actions_t *file_actions,
   /* Test for the validity of the file descriptor.  */
   if (fd < 0 || fd >= maxfd)
     return EBADF;
-
+#ifdef _WIN32
+  DWORD flags;
+  HANDLE hdl = (HANDLE)_get_osfhandle(fd);
+  if (GetHandleInformation(hdl, &flags) && (flags & HANDLE_FLAG_INHERIT)) {
+	  fprintf(stderr, "posix_spawn_file_actions_addclose called with file descriptor %d (wh: %p) however this FD already has the inherit flag on it.  GNULIB will leak any fd that pre-has inherit set, to stop call SetHandleInformation(_get_osfhandle(%d),HANDLE_FLAG_INHERIT,0);",fd,hdl,fd );
+	  exit(1);
+  }
+	  
+#endif
 #if !REPLACE_POSIX_SPAWN
   return posix_spawn_file_actions_addclose (file_actions, fd);
 #else
