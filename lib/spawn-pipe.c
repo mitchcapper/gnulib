@@ -596,7 +596,7 @@ create_pipe (const char *progname,
  fail_with_saved_errno:
   if (exit_on_error || !null_stderr)
     error (exit_on_error ? EXIT_FAILURE : 0, saved_errno,
-           _("%s subprocess failed"), progname);
+           _("%s (%s) subprocess failed"), progname, prog_path);
   errno = saved_errno;
   return -1;
 }
