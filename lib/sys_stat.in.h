@@ -247,12 +247,20 @@ struct stat
 # endif
 #endif
 
+#ifndef _WIN32
 #ifndef S_ISLNK
 # ifdef S_IFLNK
 #  define S_ISLNK(m) (((m) & S_IFMT) == S_IFLNK)
 # else
 #  define S_ISLNK(m) 0
 # endif
+#endif
+#else
+#define S_IFLNK  0x0800 // symbolic link / junciton point
+#undef S_IFMT
+#define S_IFMT (_S_IFMT | S_IFLNK)
+#define S_ISLNK(m) (((m) & S_IFMT) == S_IFLNK)
+
 #endif
 
 #ifndef S_ISMPB /* V7 */
@@ -914,7 +922,11 @@ _GL_WARN_ON_USE (stat, "stat is unportable - "
 /* mingw does not support symlinks, therefore it does not have lstat.  But
    without links, stat does just fine.  */
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#ifndef _WIN32 //not sure this is used anywherre but windows so may be redundant
 #   define lstat stat
+#else
+int lstat(char const* name, struct stat* buf);
+#endif
 #  endif
 _GL_CXXALIAS_RPL_1 (lstat, stat, int,
                     (const char *restrict name, struct stat *restrict buf));

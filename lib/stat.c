@@ -107,7 +107,21 @@ is_unc_root (const char *rname)
    correctly.  */
 
 int
-rpl_stat (char const *name, struct stat *buf)
+rpl_stat(char const* name, struct stat* buf)
+{
+	return _rpl_stat(name, buf, 0);
+
+}
+
+#undef lstat
+int
+lstat(char const* name, struct stat* buf)
+{
+	return _rpl_stat(name, buf, 1);
+
+}
+int
+_rpl_stat (char const *name, struct stat *buf, int do_lstat)
 {
 #ifdef WINDOWS_NATIVE
   /* Fill the fields ourselves, because the original stat function returns
@@ -201,6 +215,11 @@ rpl_stat (char const *name, struct stat *buf)
          CreateFile
          <https://docs.microsoft.com/en-us/windows/desktop/api/fileapi/nf-fileapi-createfilea>
          <https://docs.microsoft.com/en-us/windows/desktop/FileIO/creating-and-opening-files>  */
+		DWORD flags = FILE_FLAG_BACKUP_SEMANTICS;
+
+	  if (do_lstat)
+		flags |= FILE_FLAG_OPEN_REPARSE_POINT;
+
       HANDLE h =
         CreateFile (rname,
                     FILE_READ_ATTRIBUTES,
@@ -210,11 +229,13 @@ rpl_stat (char const *name, struct stat *buf)
                     /* FILE_FLAG_POSIX_SEMANTICS (treat file names that differ only
                        in case as different) makes sense only when applied to *all*
                        filesystem operations.  */
-                    FILE_FLAG_BACKUP_SEMANTICS /* | FILE_FLAG_POSIX_SEMANTICS */,
+                    flags /* | FILE_FLAG_POSIX_SEMANTICS */,
                     NULL);
       if (h != INVALID_HANDLE_VALUE)
         {
           ret = _gl_fstat_by_handle (h, rname, buf);
+		  if (ret && do_lstat && GetLastError() == ERROR_SYMLINK_NOT_SUPPORTED)
+			  return _rpl_stat(name, buf, 0);
           CloseHandle (h);
           goto done;
         }
@@ -281,6 +302,7 @@ rpl_stat (char const *name, struct stat *buf)
       unsigned int mode =
         /* XXX How to handle FILE_ATTRIBUTE_REPARSE_POINT ?  */
         ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? _S_IFDIR | S_IEXEC_UGO : _S_IFREG)
+        | (info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT ? S_IFLNK : 0)
         | S_IREAD_UGO
         | ((info.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? 0 : S_IWRITE_UGO);
       if (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))

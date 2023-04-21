@@ -47,6 +47,7 @@ struct dirent
   char d_name[1];
 };
 #  define GNULIB_defined_struct_dirent 1
+#  define HAVE_STRUCT_DIRENT_D_TYPE 1 //we could mod scripts that only look for rthiss or just say we have dirent
 # endif
 #endif
 
