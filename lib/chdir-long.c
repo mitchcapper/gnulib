@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
+#include "filename.h"
 #include "assure.h"
 
 #ifndef PATH_MAX
@@ -126,7 +126,7 @@ chdir_long (char *dir)
     assure (PATH_MAX <= len);
 
     /* Count leading slashes.  */
-    n_leading_slash = strspn (dir, "/");
+    n_leading_slash = strspn (dir, SLASHES);
 
     /* Handle any leading slashes as well as any name that matches
        the regular expression, m!^//hostname[/]*! .  Handling this
@@ -139,6 +139,8 @@ chdir_long (char *dir)
         /* Find next slash.
            We already know that dir[2] is neither a slash nor '\0'.  */
         char *slash = memchr (dir + 3, '/', dir_end - (dir + 3));
+		if (slash == NULL && '/' != DIR_SEPARATOR)
+			slash = memchr(dir + 3, DIR_SEPARATOR, dir_end - (dir + 3));
         if (slash == NULL)
           {
             errno = ENAMETOOLONG;
@@ -146,7 +148,7 @@ chdir_long (char *dir)
           }
         *slash = '\0';
         err = cdb_advance_fd (&cdb, dir);
-        *slash = '/';
+        *slash = DIR_SEPARATOR;
         if (err != 0)
           goto Fail;
         dir = find_non_slash (slash + 1);
@@ -158,7 +160,7 @@ chdir_long (char *dir)
         dir += n_leading_slash;
       }
 
-    assure (*dir != '/');
+    assure (! ISSLASH(*dir) );
     assure (dir <= dir_end);
 
     while (PATH_MAX <= dir_end - dir)
@@ -168,6 +170,9 @@ chdir_long (char *dir)
            I.e. see if there is a slash that will give us a name of
            length PATH_MAX-1 or less.  */
         char *slash = memrchr (dir, '/', PATH_MAX);
+		if (slash == NULL && '/' != DIR_SEPARATOR)
+			slash = memrchr(dir, DIR_SEPARATOR, PATH_MAX);
+
         if (slash == NULL)
           {
             errno = ENAMETOOLONG;
@@ -177,7 +182,7 @@ chdir_long (char *dir)
         *slash = '\0';
         assure (slash - dir < PATH_MAX);
         err = cdb_advance_fd (&cdb, dir);
-        *slash = '/';
+        *slash = DIR_SEPARATOR;
         if (err != 0)
           goto Fail;
 

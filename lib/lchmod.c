@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include <intprops.h>
+#include "filename.h"
 
 /* Work like chmod, except when FILE is a symbolic link.
    In that case, on systems where permissions on symbolic links are unsupported
@@ -69,7 +70,7 @@ lchmod (char const *file, mode_t mode)
 #endif
 
   size_t len = strlen (file);
-  if (len && file[len - 1] == '/')
+  if (len && ISSLASH(file[len - 1]) )
     {
       struct stat st;
       if (lstat (file, &st) < 0)

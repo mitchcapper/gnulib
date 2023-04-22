@@ -57,8 +57,12 @@ extern "C" {
  */
 #if defined _WIN32 || defined __CYGWIN__ \
     || defined __EMX__ || defined __MSDOS__ || defined __DJGPP__
-  /* Native Windows, Cygwin, OS/2, DOS */
-# define ISSLASH(C) ((C) == '/' || (C) == '\\')
+
+ /* Native Windows, Cygwin, OS/2, DOS */
+const char* strrpbrk(const char* s, const char* accept);
+# define DIR_SEPARATOR		'\\'
+# define ISSLASH(C) ((C) == '/' || (C) == DIR_SEPARATOR)
+# define SLASHES			"\\/"
   /* Internal macro: Tests whether a character is a drive letter.  */
 # define _IS_DRIVE_LETTER(C) \
     (((C) >= 'A' && (C) <= 'Z') || ((C) >= 'a' && (C) <= 'z'))
@@ -88,15 +92,34 @@ extern "C" {
 # define IS_FILE_NAME_WITH_DIR(Filename) \
     (strchr ((Filename), '/') != NULL || strchr ((Filename), '\\') != NULL \
      || HAS_DEVICE (Filename))
+# define LAST_SLASH_IN_PATH(str) strrpbrk(str,SLASHES)
+
+	//could not find a good place to put this otherwise
+	static const char* strrpbrk(const char* s, const char* accept) {
+		const char* p = s + strlen(s);
+		while (--p >= s) {
+			const char* c = accept;
+			while (*c) {
+				if (*c++ == *p)
+					return p;
+			}
+		}
+		return NULL;
+	}
+
+
 #else
   /* Unix */
-# define ISSLASH(C) ((C) == '/')
+# define DIR_SEPARATOR		'/'
+# define ISSLASH(C) ((C) == DIR_SEPARATOR)
+# define SLASHES			"/"
 # define HAS_DEVICE(Filename) ((void) (Filename), 0)
 # define FILE_SYSTEM_PREFIX_LEN(Filename) ((void) (Filename), 0)
 # define FILE_SYSTEM_DRIVE_PREFIX_CAN_BE_RELATIVE 0
 # define IS_ABSOLUTE_FILE_NAME(Filename) ISSLASH ((Filename)[0])
 # define IS_RELATIVE_FILE_NAME(Filename) (! ISSLASH ((Filename)[0]))
 # define IS_FILE_NAME_WITH_DIR(Filename) (strchr ((Filename), '/') != NULL)
+#define LAST_SLASH_IN_PATH(str) strrchr(str,SLASHES)
 #endif
 
 /* Deprecated macros.  For backward compatibility with old users of the

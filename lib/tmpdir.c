@@ -21,7 +21,7 @@
 
 /* Specification.  */
 #include "tmpdir.h"
-
+#include "filename.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -62,23 +62,13 @@
 # define __xstat64(version, path, buf) stat (path, buf)
 #endif
 
-/* Pathname support.
-   ISSLASH(C)           tests whether C is a directory separator character.
- */
-#if defined _WIN32 || defined __CYGWIN__ || defined __EMX__ || defined __DJGPP__
-  /* Native Windows, Cygwin, OS/2, DOS */
-# define ISSLASH(C) ((C) == '/' || (C) == '\\')
-#else
-  /* Unix */
-# define ISSLASH(C) ((C) == '/')
-#endif
 
 
 /* Return nonzero if DIR is an existent directory.  */
 static bool
 direxists (const char *dir)
 {
-  struct_stat64 buf;
+  struct_stat64 buf; 
   return __xstat64 (_STAT_VER, dir, &buf) == 0 && S_ISDIR (buf.st_mode);
 }
 

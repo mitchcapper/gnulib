@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "filename.h"
 
 #if !HAVE_CHOWN
 
@@ -113,7 +114,7 @@ rpl_chown (const char *file, uid_t uid, gid_t gid)
   if (!stat_valid)
     {
       size_t len = strlen (file);
-      if (len && file[len - 1] == '/' && stat (file, &st))
+      if (len && ISSLASH(file[len - 1]) && stat (file, &st))
         return -1;
     }
 # endif

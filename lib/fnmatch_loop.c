@@ -18,6 +18,7 @@
 #ifdef _LIBC
 # include <stdint.h>
 #endif
+#include "filename.h"
 
 struct STRUCT
 {
@@ -70,7 +71,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
 
           if (n == string_end)
             return FNM_NOMATCH;
-          else if (*n == L_('/') && (flags & FNM_FILE_NAME))
+          else if ( ISSLASH(*n) && (flags & FNM_FILE_NAME))
             return FNM_NOMATCH;
           else if (*n == L_('.') && no_leading_period)
             return FNM_NOMATCH;
@@ -127,7 +128,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
                   if (n == string_end)
                     /* There isn't another character; no match.  */
                     return FNM_NOMATCH;
-                  else if (*n == L_('/')
+                  else if ( ISSLASH(*n)
                            && __glibc_unlikely (flags & FNM_FILE_NAME))
                     /* A slash does not match a wildcard under
                        FNM_FILE_NAME.  */
@@ -154,7 +155,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
                     result = 0;
                   else
                     {
-                      if (MEMCHR (n, L_('/'), string_end - n) == NULL)
+                      if (MEMCHR (n, L_('/'), string_end - n) == NULL && MEMCHR(n, L_(DIR_SEPARATOR), string_end - n) == NULL)
                         result = 0;
                     }
                 }
@@ -167,8 +168,10 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
               struct STRUCT end;
 
               end.pattern = NULL;
-              endp = MEMCHR (n, (flags & FNM_FILE_NAME) ? L_('/') : L_('\0'),
+              endp = MEMCHR (n, (flags & FNM_FILE_NAME) ? L_(DIR_SEPARATOR) : L_('\0'),
                              string_end - n);
+			  if (endp == NULL && (flags & FNM_FILE_NAME) && DIR_SEPARATOR != '/')
+				  endp = MEMCHR(n, L_('/'), string_end - n);
               if (endp == NULL)
                 endp = string_end;
 
@@ -185,11 +188,11 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
                              &end, alloca_used) == 0)
                       goto found;
                 }
-              else if (c == L_('/') && (flags & FNM_FILE_NAME))
+              else if (ISSLASH(c) && (flags & FNM_FILE_NAME))
                 {
-                  while (n < string_end && *n != L_('/'))
+                  while (n < string_end && ! ISSLASH(*n))
                     ++n;
-                  if (n < string_end && *n == L_('/')
+                  if (n < string_end && ISSLASH (*n)
                       && (FCT (p, n + 1, string_end, flags & FNM_PERIOD, flags,
                                NULL, alloca_used) == 0))
                     return 0;
@@ -243,7 +246,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
             if (*n == L_('.') && no_leading_period)
               return FNM_NOMATCH;
 
-            if (*n == L_('/') && (flags & FNM_FILE_NAME))
+            if (ISSLASH(*n) && (flags & FNM_FILE_NAME))
               /* '/' cannot be matched.  */
               return FNM_NOMATCH;
 
@@ -900,6 +903,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
           goto normal_match;
 
         case L_('/'):
+		case L_(DIR_SEPARATOR):
           if (NO_LEADING_PERIOD (flags))
             {
               if (n == string_end || c != (UCHAR) *n)
@@ -922,7 +926,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
   if (n == string_end)
     return 0;
 
-  if ((flags & FNM_LEADING_DIR) && n != string_end && *n == L_('/'))
+  if ((flags & FNM_LEADING_DIR) && n != string_end && ISSLASH( *n ))
     /* The FNM_LEADING_DIR flag says that "foo*" matches "foobar/frobozz".  */
     return 0;
 
@@ -1100,7 +1104,7 @@ EXT (INT opt, const CHAR *pattern, const CHAR *string, const CHAR *string_end,
                 && (FCT (p, rs, string_end,
                          rs == string
                          ? no_leading_period
-                         : rs[-1] == '/' && NO_LEADING_PERIOD (flags),
+                         : ISSLASH(rs[-1]) && NO_LEADING_PERIOD (flags),
                          flags & FNM_FILE_NAME
                          ? flags : flags & ~FNM_PERIOD, NULL, alloca_used) == 0
                     /* This didn't work.  Try the whole pattern.  */
@@ -1108,7 +1112,7 @@ EXT (INT opt, const CHAR *pattern, const CHAR *string, const CHAR *string_end,
                         && FCT (pattern - 1, rs, string_end,
                                 rs == string
                                 ? no_leading_period
-                                : rs[-1] == '/' && NO_LEADING_PERIOD (flags),
+                                : ISSLASH(rs[-1]) && NO_LEADING_PERIOD (flags),
                                 flags & FNM_FILE_NAME
                                 ? flags : flags & ~FNM_PERIOD, NULL,
                                 alloca_used) == 0)))
@@ -1160,7 +1164,7 @@ EXT (INT opt, const CHAR *pattern, const CHAR *string, const CHAR *string_end,
               && (FCT (p, rs, string_end,
                        rs == string
                        ? no_leading_period
-                       : rs[-1] == '/' && NO_LEADING_PERIOD (flags),
+                       : ISSLASH(rs[-1]) && NO_LEADING_PERIOD (flags),
                        flags & FNM_FILE_NAME ? flags : flags & ~FNM_PERIOD,
                        NULL, alloca_used) == 0))
             /* This is successful.  */

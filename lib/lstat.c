@@ -22,7 +22,7 @@
    rpl_lstat.  */
 #define __need_system_sys_stat_h
 #include <config.h>
-
+#include "filename.h"
 #if !HAVE_LSTAT
 /* On systems that lack symlinks, our replacement <sys/stat.h> already
    defined lstat as stat, so there is nothing further to do other than
@@ -81,7 +81,7 @@ rpl_lstat (const char *file, struct stat *sbuf)
      out above, with a failure return of ENOENT.  */
   if (result == 0)
     {
-      if (S_ISDIR (sbuf->st_mode) || file[strlen (file) - 1] != '/')
+      if (S_ISDIR (sbuf->st_mode) || ISSLASH(file[strlen (file) - 1]))
         result = stat_time_normalize (result, sbuf);
       else
         {

@@ -38,6 +38,7 @@
 #endif
 
 #include "intprops.h"
+#include "filename.h"
 
 /* Set BUF to the name of the subfile of the directory identified by
    FD, where the subfile is named FILE.  If successful, return BUF if
@@ -145,7 +146,7 @@ openat_proc_name (char buf[OPENAT_BUFFER_SIZE], int fd, char const *file)
       }
 
     strcpy (result, dir);
-    result[dirlen++] = '/';
+    result[dirlen++] = DIR_SEPERATOR;
   }
 #endif
 

@@ -26,6 +26,7 @@
 /* Get the original definition of fstatat.  It might be defined as a macro.  */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "filename.h"
 #undef __need_system_sys_stat_h
 
 #if HAVE_FSTATAT && HAVE_WORKING_FSTATAT_ZERO_FLAG
@@ -85,7 +86,7 @@ rpl_fstatat (int fd, char const *file, struct stat *st, int flag)
   if (flag & AT_SYMLINK_NOFOLLOW)
     {
       /* Fix lstat behavior.  */
-      if (file[len - 1] != '/' || S_ISDIR (st->st_mode))
+      if (ISSLASH(file[len - 1]) || S_ISDIR (st->st_mode))
         return 0;
       if (!S_ISLNK (st->st_mode))
         {
@@ -95,7 +96,7 @@ rpl_fstatat (int fd, char const *file, struct stat *st, int flag)
       result = normal_fstatat (fd, file, st, flag & ~AT_SYMLINK_NOFOLLOW);
     }
   /* Fix stat behavior.  */
-  if (result == 0 && !S_ISDIR (st->st_mode) && file[len - 1] == '/')
+  if (result == 0 && !S_ISDIR (st->st_mode) && ISSLASH(file[len - 1]))
     {
       errno = ENOTDIR;
       return -1;

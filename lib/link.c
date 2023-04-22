@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "filename.h"
 
 #if !HAVE_LINK
 # if defined _WIN32 && ! defined __CYGWIN__
@@ -87,8 +88,8 @@ link (const char *file1, const char *file2)
     }
   /* Reject trailing slashes on non-directories; native Windows does not
      support hard-linking directories.  */
-  if ((len1 && (file1[len1 - 1] == '/' || file1[len1 - 1] == '\\'))
-      || (len2 && (file2[len2 - 1] == '/' || file2[len2 - 1] == '\\')))
+  if ((len1 && ISSLASH(file1[len1 - 1]))
+      || (len2 && ISSLASH(file2[len2 - 1]))
     {
       /* If stat() fails, then link() should fail for the same reason.  */
       struct stat st;
@@ -113,7 +114,7 @@ link (const char *file1, const char *file2)
   {
     struct stat st;
     char *p = strchr (dir, '\0');
-    while (dir < p && (*--p != '/' && *p != '\\'));
+    while (dir < p && ISSLASH(*--p));
     *p = '\0';
     if (p != dir && stat (dir, &st) != 0 && errno != EOVERFLOW)
       {
@@ -196,8 +197,8 @@ rpl_link (char const *file1, char const *file2)
   /* Reject trailing slashes on non-directories.  */
   len1 = strlen (file1);
   len2 = strlen (file2);
-  if ((len1 && file1[len1 - 1] == '/')
-      || (len2 && file2[len2 - 1] == '/'))
+  if ((len1 && ISSLASH(file1[len1 - 1]))
+      || (len2 && ISSLASH(file2[len2 - 1])))
     {
       /* Let link() decide whether hard-linking directories is legal.
          If stat() fails, then link() should fail for the same reason
@@ -220,7 +221,7 @@ rpl_link (char const *file1, char const *file2)
         return -1;
       /* We already know file2 does not end in slash.  Strip off the
          basename, then check that the dirname exists.  */
-      p = strrchr (dir, '/');
+      p = LAST_SLASH_IN_PATH(dir);
       if (p)
         {
           *p = '\0';

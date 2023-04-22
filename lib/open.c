@@ -21,7 +21,7 @@
    rpl_open.  */
 #define __need_system_fcntl_h
 #include <config.h>
-
+#include "filename.h"
 /* Get the original definition of open.  It might be defined as a macro.  */
 #include <fcntl.h>
 #include <sys/types.h>
@@ -123,7 +123,7 @@ open (const char *filename, int flags, ...)
       || (flags & O_ACCMODE) == O_WRONLY)
     {
       size_t len = strlen (filename);
-      if (len > 0 && filename[len - 1] == '/')
+      if (len > 0 &&  ISSLASH(filename[len - 1]))
         {
           errno = EISDIR;
           return -1;
@@ -190,7 +190,7 @@ open (const char *filename, int flags, ...)
     {
       /* We know len is positive, since open did not fail with ENOENT.  */
       size_t len = strlen (filename);
-      if (filename[len - 1] == '/')
+      if (ISSLASH( filename[len - 1]) )
         {
           struct stat statbuf;
 

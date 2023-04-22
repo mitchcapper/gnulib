@@ -163,8 +163,8 @@ renameatu (int fd1, char const *src, int fd2, char const *dst,
   if (!src_len || !dst_len)
     return renameat2ish (fd1, src, fd2, dst, flags);
 
-  src_slash = src[src_len - 1] == '/';
-  dst_slash = dst[dst_len - 1] == '/';
+  src_slash = ISSLASH(src[src_len - 1]);
+  dst_slash = ISSLASH(dst[dst_len - 1]);
   if (!src_slash && !dst_slash)
     return renameat2ish (fd1, src, fd2, dst, flags);
 

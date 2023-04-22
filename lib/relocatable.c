@@ -25,7 +25,7 @@
 
 #define _GL_USE_STDLIB_ALLOC 1
 #include <config.h>
-
+#include "filename.h"
 /* Specification.  */
 #include "relocatable.h"
 
@@ -79,24 +79,6 @@
 #define false 0
 #define true 1
 
-/* Pathname support.
-   ISSLASH(C)                tests whether C is a directory separator character.
-   IS_FILE_NAME_WITH_DIR(P)  tests whether P contains a directory specification.
- */
-#if (defined _WIN32 && !defined __CYGWIN__) || defined __EMX__ || defined __DJGPP__
-  /* Native Windows, OS/2, DOS */
-# define ISSLASH(C) ((C) == '/' || (C) == '\\')
-# define HAS_DEVICE(P) \
-    ((((P)[0] >= 'A' && (P)[0] <= 'Z') || ((P)[0] >= 'a' && (P)[0] <= 'z')) \
-     && (P)[1] == ':')
-# define IS_FILE_NAME_WITH_DIR(P) \
-    (strchr (P, '/') != NULL || strchr (P, '\\') != NULL || HAS_DEVICE (P))
-# define FILE_SYSTEM_PREFIX_LEN(P) (HAS_DEVICE (P) ? 2 : 0)
-#else
-  /* Unix */
-# define ISSLASH(C) ((C) == '/')
-# define IS_FILE_NAME_WITH_DIR(P) (strchr (P, '/') != NULL)
-# define FILE_SYSTEM_PREFIX_LEN(P) 0
 #endif
 
 /* Whether to enable the more costly support for relocatable libraries.
@@ -425,9 +407,9 @@ find_shared_library_fullname ()
           if (address >= start && address <= end - 1)
             {
               /* Found it.  Now see if this line contains a filename.  */
-              while (c = getc (fp), c != EOF && c != '\n' && c != '/')
+              while (c = getc (fp), c != EOF && c != '\n' && ! ISSLASH(c))
                 continue;
-              if (c == '/')
+              if (ISSLASH(c))
                 {
                   size_t size;
                   int len;

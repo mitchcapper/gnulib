@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
-
+#include "filename.h"
 
 #if HAVE_SYMLINK
 
@@ -33,7 +33,7 @@ int
 rpl_symlink (char const *contents, char const *name)
 {
   size_t len = strlen (name);
-  if (len && name[len - 1] == '/')
+  if (len && ISSLASH(name[len - 1]))
     {
       struct stat st;
       if (lstat (name, &st) == 0 || errno == EOVERFLOW)

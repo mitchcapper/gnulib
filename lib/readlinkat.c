@@ -20,7 +20,7 @@
 
 /* Specification.  */
 #include <unistd.h>
-
+#include "filename.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +36,7 @@ rpl_readlinkat (int fd, char const *file, char *buf, size_t bufsize)
 {
 # if READLINK_TRAILING_SLASH_BUG
   size_t file_len = strlen (file);
-  if (file_len && file[file_len - 1] == '/')
+  if (file_len && ISSLASH(file[file_len - 1]) )
     {
       /* Even if FILE without the slash is a symlink to a directory,
          both lstat() and stat() must resolve the trailing slash to

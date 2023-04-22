@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "filename.h"
 
 #if !HAVE_LCHOWN
 
@@ -89,7 +90,7 @@ rpl_lchown (const char *file, uid_t uid, gid_t gid)
   if (!stat_valid)
     {
       size_t len = strlen (file);
-      if (len && file[len - 1] == '/')
+      if (len && ISSLASH(file[len - 1]))
         return chown (file, uid, gid);
     }
 # endif

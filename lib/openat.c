@@ -99,7 +99,7 @@ rpl_openat (int dfd, char const *filename, int flags, ...)
       || (flags & O_ACCMODE) == O_WRONLY)
     {
       size_t len = strlen (filename);
-      if (len > 0 && filename[len - 1] == '/')
+      if (len > 0 && ISSLASH(filename[len - 1]))
         {
           errno = EISDIR;
           return -1;
@@ -149,7 +149,7 @@ rpl_openat (int dfd, char const *filename, int flags, ...)
     {
       /* We know len is positive, since open did not fail with ENOENT.  */
       size_t len = strlen (filename);
-      if (filename[len - 1] == '/')
+      if ( ISSLASH(filename[len - 1]) )
         {
           struct stat statbuf;
 
