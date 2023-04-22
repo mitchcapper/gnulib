@@ -51,6 +51,10 @@ rpl_symlink (char const *contents, char const *name)
 	  return 0;
 
   errno = GetLastError();
+  if (errno == ERROR_ALREADY_EXISTS) //windows will return this if trying to link a folder and target is a folder name 
+	  errno = EEXIST;
+  if (errno == ERROR_ACCESS_DENIED) //if passing an existing folder this will occur our fallback behavior expects EEXIST in that case
+	  errno = EEXIST;
   return -1;
 #else
   return symlink(contents, name);
