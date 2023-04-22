@@ -30,11 +30,23 @@
 static int
 orig_open (const char *filename, int flags, mode_t mode)
 {
+	int fd;
 #if defined _WIN32 && !defined __CYGWIN__
-  return _open (filename, flags, mode);
+  fd = _open (filename, flags, mode);
 #else
-  return open (filename, flags, mode);
+  fd = open (filename, flags, mode);
 #endif
+#if defined _WIN32
+  if (fd < 0 && errno == ENOENT && strlen(filename) > 1 && ISSLASH(filename[strlen(filename) - 1]) ) {   ///so windows is odd it doesn't like \ at the end of a path (https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfilea see end in a trailing \)  it returns errno=2 ENOENT however while it also doesn't like a path ending in / it returns errno=13 EACCES for this (which the below then fixes)
+	  struct _stat buf;
+	  int result = _stat(filename, &buf);
+	  if (result != 0 || (buf.st_mode & _S_IFDIR) != _S_IFDIR)
+		  _set_errno(ENOENT);
+	  else
+		  _set_errno(EACCES);
+  }
+#endif
+  return fd;
 }
 
 /* Specification.  */
