@@ -55,7 +55,7 @@ base_name (char const *name)
   if (dotslash_len)
     {
       p[0] = '.';
-      p[1] = DIR_SEPERATOR;
+      p[1] = DIR_SEPARATOR;
     }
 
   /* Finally, copy the basename.  */
