@@ -30,7 +30,7 @@
 # include "basename-lgpl.h"
 
 # ifndef DIRECTORY_SEPARATOR
-#  define DIRECTORY_SEPARATOR '/'
+#  define DIRECTORY_SEPARATOR DIR_SEPARATOR
 # endif
 
 #ifdef __cplusplus

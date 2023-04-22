@@ -22,6 +22,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include "filename.h"
 
 #if !HAVE_MKFIFO
 /* Mingw lacks mkfifo; always fail with ENOSYS.  */
@@ -45,7 +46,7 @@ rpl_mkfifo (char const *name, mode_t mode)
 {
 # if MKFIFO_TRAILING_SLASH_BUG
   size_t len = strlen (name);
-  if (len && name[len - 1] == '/')
+  if (len && ISSLASH(name[len - 1]) )
     {
       struct stat st;
       if (stat (name, &st) == 0 || errno == EOVERFLOW)

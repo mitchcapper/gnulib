@@ -24,6 +24,7 @@
 
 /* Get the original definition of fopen.  It might be defined as a macro.  */
 #include <stdio.h>
+#include "filename.h"
 #undef _GL_SKIP_GNULIB_STDIO_H
 
 static FILE *
@@ -167,7 +168,7 @@ rpl_fopen (const char *filename, const char *mode)
      fopen() must fail since the file does not contain a '.' directory.  */
   {
     size_t len = strlen (filename);
-    if (len > 0 && filename[len - 1] == '/')
+    if (len > 0 && ISSLASH(filename[len - 1]))
       {
         int fd;
         struct stat statbuf;

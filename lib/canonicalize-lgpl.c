@@ -242,12 +242,12 @@ realpath_stk (const char *name, char *resolved, struct realpath_bufs *bufs)
   else
     {
       dest = __mempcpy (rname, name, prefix_len);
-      *dest++ = '/';
+      *dest++ = DIR_SEPERATOR;
       if (DOUBLE_SLASH_IS_DISTINCT_ROOT)
         {
           if (prefix_len == 0 /* implies ISSLASH (name[0]) */
               && ISSLASH (name[1]) && !ISSLASH (name[2]))
-            *dest++ = '/';
+            *dest++ = DIR_SEPERATOR;
           *dest = '\0';
         }
       start = name + prefix_len;
@@ -285,7 +285,7 @@ realpath_stk (const char *name, char *resolved, struct realpath_bufs *bufs)
       else
         {
           if (!ISSLASH (dest[-1]))
-            *dest++ = '/';
+            *dest++ = DIR_SEPERATOR;
 
           while (rname + bufs->rname.length - dest
                  < startlen + sizeof dir_suffix)
@@ -351,11 +351,11 @@ realpath_stk (const char *name, char *resolved, struct realpath_bufs *bufs)
                   idx_t pfxlen = FILE_SYSTEM_PREFIX_LEN (buf);
 
                   dest = __mempcpy (rname, buf, pfxlen);
-                  *dest++ = '/'; /* It's an absolute symlink */
+                  *dest++ = DIR_SEPERATOR; /* It's an absolute symlink */
                   if (DOUBLE_SLASH_IS_DISTINCT_ROOT)
                     {
                       if (ISSLASH (buf[1]) && !ISSLASH (buf[2]) && !pfxlen)
-                        *dest++ = '/';
+                        *dest++ = DIR_SEPERATOR;
                       *dest = '\0';
                     }
                   /* Install the new prefix to be in effect hereafter.  */

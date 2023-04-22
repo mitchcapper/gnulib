@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 
 #include <stdlib.h>
+#include "filename.h"
 
 #if HAVE_MKFIFOAT
 
@@ -35,7 +36,7 @@ rpl_mkfifoat (int fd, char const *file, mode_t mode)
 {
   /* Use the original mkfifoat(), but correct the trailing slash handling.  */
   size_t len = strlen (file);
-  if (len && file[len - 1] == '/')
+  if (len && ISSLASH(file[len - 1]) )
     {
       struct stat st;
 

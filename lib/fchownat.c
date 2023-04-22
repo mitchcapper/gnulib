@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "openat.h"
+#include "filename.h"
 
 #if !HAVE_FCHOWNAT
 
@@ -101,7 +102,7 @@ rpl_fchownat (int fd, char const *file, uid_t owner, gid_t group, int flag)
   {
     size_t len = strlen (file);
     struct stat st;
-    if (len && file[len - 1] == '/')
+    if (len && ISSLASH(file[len - 1]))
       {
         if (fstatat (fd, file, &st, 0))
           return -1;

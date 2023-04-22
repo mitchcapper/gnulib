@@ -26,7 +26,7 @@
 
 #if HAVE_SYMLINKAT
 # undef symlinkat
-
+#include "filename.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -36,7 +36,7 @@ int
 rpl_symlinkat (char const *contents, int fd, char const *name)
 {
   size_t len = strlen (name);
-  if (len && name[len - 1] == '/')
+  if (len && ISSLASH(name[len - 1]))
     {
       struct stat st;
       if (fstatat (fd, name, &st, AT_SYMLINK_NOFOLLOW) == 0

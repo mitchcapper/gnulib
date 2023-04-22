@@ -30,7 +30,7 @@
 #include <errno.h>
 
 #include <fcntl.h>
-
+#include "filename.h"
 #include <unistd.h>
 
 #if HAVE_SYS_PARAM_H
@@ -704,7 +704,7 @@ read_file_system_list (bool need_fs_type)
             else
               {
                 name = xmalloc (1 + strlen (d->d_name) + 1);
-                name[0] = '/';
+                name[0] = DIR_SEPARATOR;
                 strcpy (name + 1, d->d_name);
               }
 

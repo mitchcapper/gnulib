@@ -320,8 +320,8 @@ rpl_rename (char const *src, char const *dst)
   }
 # endif /* RENAME_DEST_EXISTS_BUG */
 
-  src_slash = src[src_len - 1] == '/';
-  dst_slash = dst[dst_len - 1] == '/';
+  src_slash = ISSLASH(src[src_len - 1]);
+  dst_slash = ISSLASH(dst[dst_len - 1]);
 
 # if !RENAME_HARD_LINK_BUG && !RENAME_DEST_EXISTS_BUG
   /* If there are no trailing slashes, then trust the native
@@ -448,7 +448,7 @@ rpl_rename (char const *src, char const *dst)
         }
       src_len = strlen (src_temp);
       if (strncmp (src_temp, dst_temp, src_len) == 0
-          && dst_temp[src_len] == '/')
+          && ISSLASH(dst_temp[src_len]) )
         {
           rename_errno = EINVAL;
           goto out;

@@ -39,7 +39,7 @@
 #if GNULIB_MCEL_PREFER
 # include "mcel.h"
 #else
-# include "mbuiter.h"
+#include "mbuiter.h"
 #endif
 #include "xalloc.h"
 
@@ -286,8 +286,8 @@ free_exclude_segment (struct exclude_segment *seg)
     {
     case exclude_pattern:
       for (idx_t i = 0; i < seg->v.pat.exclude_count; i++)
-        if (seg->v.pat.exclude[i].options & EXCLUDE_REGEX)
-          regfree (&seg->v.pat.exclude[i].v.re);
+          if (seg->v.pat.exclude[i].options & EXCLUDE_REGEX)
+            regfree (&seg->v.pat.exclude[i].v.re);
       free (seg->v.pat.exclude);
       break;
 
@@ -337,7 +337,7 @@ fnmatch_no_wildcards (char const *pattern, char const *f, int options)
       if (! r)
         {
           r = f[patlen];
-          if (r == '/')
+          if (ISSLASH(r))
             r = 0;
         }
       return r;
@@ -353,9 +353,9 @@ fnmatch_no_wildcards (char const *pattern, char const *f, int options)
 
       char *fcopy = xstrdup (f);
       int r;
-      for (char *p = fcopy; ; *p++ = '/')
+      for (char *p = fcopy; ; *p++ = DIR_SEPARATOR)
         {
-          p = strchr (p, '/');
+          p = strpbrk(p, SLASHES);
           if (p)
             *p = '\0';
           r = mbscasecmp (pattern, fcopy);
@@ -378,7 +378,7 @@ exclude_fnmatch (char const *pattern, char const *f, int options)
 
   if (! (options & EXCLUDE_ANCHORED))
     for (char const *p = f; *p && ! matched; p++)
-      if (*p == '/' && p[1] != '/')
+      if ( ISSLASH(*p) && ! ISSLASH(p[1]))
         matched = matcher (pattern, p + 1, options) == 0;
 
   return matched;
@@ -403,8 +403,8 @@ file_pattern_matches (struct exclude_segment const *seg, char const *f)
   struct patopts const *exclude = seg->v.pat.exclude;
 
   for (idx_t i = 0; i < exclude_count; i++)
-    if (exclude_patopts (exclude + i, f))
-      return true;
+      if (exclude_patopts (exclude + i, f))
+        return true;
   return false;
 }
 
@@ -429,7 +429,7 @@ file_name_matches (struct exclude_segment const *seg, char const *f,
             return true;
           if (options & FNM_LEADING_DIR)
             {
-              char *p = strrchr (buffer, '/');
+              char *p = LAST_SLASH_IN_PATH(buffer);
               if (p)
                 {
                   *p = '\0';
@@ -441,7 +441,7 @@ file_name_matches (struct exclude_segment const *seg, char const *f,
 
       if (!(options & EXCLUDE_ANCHORED))
         {
-          f = strchr (f, '/');
+          f = strpbrk (f, SLASHES);
           if (f)
             f++;
         }
@@ -531,23 +531,23 @@ add_exclude (struct exclude *ex, char const *pattern, int options)
             rc = regcomp (&patopts->v.re, pattern, cflags);
           else
             for (idx_t len = strlen (pattern); ; len--)
-              {
-                if (len == 0)
+            {
+              if (len == 0)
                   {
-                    rc = 1;
+                rc = 1;
                     break;
                   }
                 if (!ISSLASH (pattern[len - 1]))
-                  {
+                {
                     static char const patsuffix[] = "(/.*)?";
                     char *tmp = ximalloc (len + sizeof patsuffix);
-                    memcpy (tmp, pattern, len);
+                  memcpy (tmp, pattern, len);
                     strcpy (tmp + len, patsuffix);
-                    rc = regcomp (&patopts->v.re, tmp, cflags);
-                    free (tmp);
+                  rc = regcomp (&patopts->v.re, tmp, cflags);
+                  free (tmp);
                     break;
-                  }
-              }
+                }
+            }
 
           if (rc)
             {

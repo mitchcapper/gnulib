@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "filename.h"
+
 #undef _GL_INCLUDING_UNISTD_H
 
 #if HAVE_FACCESSAT
@@ -44,7 +46,7 @@ orig_faccessat (int fd, char const *name, int mode, int flag)
 /* Write "unistd.h" here, not <unistd.h>, otherwise OSF/1 5.1 DTK cc
    eliminates this include because of the preliminary #include <unistd.h>
    above.  */
-# include "unistd.h"
+#include "unistd.h"
 #else
 # include <unistd.h>
 #endif
@@ -63,7 +65,7 @@ rpl_faccessat (int fd, char const *file, int mode, int flag)
 {
   int result = orig_faccessat (fd, file, mode, flag);
 
-  if (file[strlen (file) - 1] == '/')
+  if ( ISSLASH(file[strlen (file) - 1]) )
     {
       struct stat st;
       int ret = fstatat (fd, file, &st, 0);

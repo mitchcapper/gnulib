@@ -56,7 +56,7 @@ mfile_name_concat (char const *dir, char const *base, char **base_in_result)
     {
       /* DIR is not a file system root, so separate with / if needed.  */
       if (! ISSLASH (dir[dirlen - 1]) && ! ISSLASH (*base))
-        sep = '/';
+        sep = DIR_SEPARATOR;
     }
   else if (ISSLASH (*base))
     {

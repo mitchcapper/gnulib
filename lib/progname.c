@@ -21,7 +21,7 @@
 /* Specification.  */
 #undef ENABLE_RELOCATABLE /* avoid defining set_program_name as a macro */
 #include "progname.h"
-
+#include "filename.h"
 #include <errno.h> /* get program_invocation_name declaration */
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +56,7 @@ set_program_name (const char *argv0)
       abort ();
     }
 
-  slash = strrchr (argv0, '/');
+  slash = LAST_SLASH_IN_PATH(argv0);
   base = (slash != NULL ? slash + 1 : argv0);
   if (base - argv0 >= 7 && strncmp (base - 7, "/.libs/", 7) == 0)
     {

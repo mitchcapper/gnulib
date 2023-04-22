@@ -50,6 +50,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <alloca.h>
+#include "filename.h"
 
 #ifdef _LIBC
 # undef strdup
@@ -308,7 +309,7 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
 
   /* POSIX requires all slashes to be matched.  This means that with
      a trailing slash we must match only directories.  */
-  if (pattern[0] && pattern[strlen (pattern) - 1] == '/')
+  if (pattern[0] && ISSLASH(pattern[strlen (pattern) - 1]))
     flags |= GLOB_ONLYDIR;
 
   if (!(flags & GLOB_DOOFFS))
@@ -472,7 +473,7 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
   oldcount = pglob->gl_pathc + pglob->gl_offs;
 
   /* Find the filename.  */
-  filename = strrchr (pattern, '/');
+  filename = LAST_SLASH_IN_PATH(pattern);
 
 #if defined __MSDOS__ || defined WINDOWS32
   /* The case of "d:pattern".  Since ':' is not allowed in
@@ -560,7 +561,7 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
       bool drive_root = (dirlen > 1
                          && (dirname[dirlen - 1] == ':'
                              || (dirlen > 2 && dirname[dirlen - 2] == ':'
-                                 && dirname[dirlen - 1] == '/')));
+                                 && ISSLASH(dirname[dirlen - 1]) )));
 #else
       bool drive_root = false;
 #endif
@@ -569,7 +570,7 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
         /* "pattern/".  Expand "pattern", appending slashes.  */
         {
           int orig_flags = flags;
-          if (!(flags & GLOB_NOESCAPE) && dirname[dirlen - 1] == '\\')
+          if (!(flags & GLOB_NOESCAPE) && ISSLASH(dirname[dirlen - 1]))
             {
               /* "pattern\\/".  Remove the final backslash if it hasn't
                  been quoted.  */
@@ -601,9 +602,9 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
 
   if ((flags & (GLOB_TILDE|GLOB_TILDE_CHECK)) && dirname[0] == '~')
     {
-      if (dirname[1] == '\0' || dirname[1] == '/'
-          || (!(flags & GLOB_NOESCAPE) && dirname[1] == '\\'
-              && (dirname[2] == '\0' || dirname[2] == '/')))
+      if (dirname[1] == '\0' || ISSLASH(dirname[1])
+          || (!(flags & GLOB_NOESCAPE) && ISSLASH(dirname[1])
+              && (dirname[2] == '\0' || ISSLASH(dirname[2]))))
         {
           /* Look up home directory.  */
           char *home_dir = getenv ("HOME");
@@ -736,7 +737,7 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
 #ifndef WINDOWS32
           /* Recognize ~user as a shorthand for the specified user's home
              directory.  */
-          char *end_name = strchr (dirname, '/');
+          char *end_name = strpbrk(dirname, SLASHES);
           char *user_name;
           int malloc_user_name = 0;
           char *unescape = NULL;
@@ -923,7 +924,7 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
           if (pglob->gl_pathv[newcount] == NULL)
             goto nospace;
           p = mempcpy (pglob->gl_pathv[newcount], dirname, dirlen);
-          p[0] = '/';
+          p[0] = DIR_SEPARATOR;
           p[1] = '\0';
           if (__glibc_unlikely (malloc_dirname))
             free (dirname);
@@ -1214,9 +1215,9 @@ prefix_array (const char *dirname, char **array, size_t n)
 {
   size_t i;
   size_t dirlen = strlen (dirname);
-  char dirsep_char = '/';
+  char dirsep_char = DIR_SEPARATOR;
 
-  if (dirlen == 1 && dirname[0] == '/')
+  if (dirlen == 1 && ISSLASH(dirname[0]) )
     /* DIRNAME is just "/", so normal prepending would get us "//foo".
        We want "/foo" instead, so don't prepend any chars from DIRNAME.  */
     dirlen = 0;
@@ -1224,7 +1225,7 @@ prefix_array (const char *dirname, char **array, size_t n)
 #if defined __MSDOS__ || defined WINDOWS32
   if (dirlen > 1)
     {
-      if (dirname[dirlen - 1] == '/' && dirname[dirlen - 2] == ':')
+      if (ISSLASH(dirname[dirlen - 1]) && dirname[dirlen - 2] == ':')
         /* DIRNAME is "d:/".  Don't prepend the slash from DIRNAME.  */
         --dirlen;
       else if (dirname[dirlen - 1] == ':')
@@ -1385,8 +1386,8 @@ glob_in_dir (const char *pattern, const char *directory, int flags,
                             && !scratch_buffer_set_array_size (&s, need, 1))
                           goto memory_error;
                         char *p = mempcpy (s.data, directory, dirlen);
-                        *p = '/';
-                        p += p[-1] != '/';
+                        *p = DIR_SEPERATOR;
+                        p += ISSLASH(p[-1]);
                         memcpy (p, d.name, namelen + 1);
                         if (! is_dir (s.data, flags, pglob))
                           continue;

@@ -22,6 +22,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include "filename.h"
 
 int
 rpl_chmod (const char *filename, mode_t mode)
@@ -31,7 +32,7 @@ rpl_chmod (const char *filename, mode_t mode)
 #endif
 {
   size_t len = strlen (filename);
-  if (len > 0 && filename[len - 1] == '/')
+  if (len > 0 && ISSLASH(filename[len - 1]) )
     {
       struct stat st;
       if (lstat (filename, &st) < 0)

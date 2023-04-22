@@ -50,6 +50,7 @@
 #endif
 
 #include "relocatable.h"
+#include "filename.h"
 
 #ifdef NO_XMALLOC
 # include "areadlink.h"
@@ -85,25 +86,6 @@ extern char * canonicalize_file_name (const char *name);
 # define GetModuleFileName GetModuleFileNameA
 #endif
 
-/* Pathname support.
-   ISSLASH(C)                tests whether C is a directory separator character.
-   IS_FILE_NAME_WITH_DIR(P)  tests whether P contains a directory specification.
- */
-#if (defined _WIN32 && !defined __CYGWIN__) || defined __EMX__ || defined __DJGPP__
-  /* Native Windows, OS/2, DOS */
-# define ISSLASH(C) ((C) == '/' || (C) == '\\')
-# define HAS_DEVICE(P) \
-    ((((P)[0] >= 'A' && (P)[0] <= 'Z') || ((P)[0] >= 'a' && (P)[0] <= 'z')) \
-     && (P)[1] == ':')
-# define IS_FILE_NAME_WITH_DIR(P) \
-    (strchr (P, '/') != NULL || strchr (P, '\\') != NULL || HAS_DEVICE (P))
-# define FILE_SYSTEM_PREFIX_LEN(P) (HAS_DEVICE (P) ? 2 : 0)
-#else
-  /* Unix */
-# define ISSLASH(C) ((C) == '/')
-# define IS_FILE_NAME_WITH_DIR(P) (strchr (P, '/') != NULL)
-# define FILE_SYSTEM_PREFIX_LEN(P) 0
-#endif
 
 /* Use the system functions, not the gnulib overrides in this file.  */
 #undef sprintf
@@ -341,7 +323,7 @@ find_executable (const char *argv0)
   char location[4096];
   unsigned int length = sizeof (location);
   if (_NSGetExecutablePath (location, &length) == 0
-      && location[0] == '/')
+      && ISSLASH(location[0]) )
     return canonicalize_file_name (location);
 # endif
   /* Guess the executable's full path.  We assume the executable has been
@@ -352,7 +334,7 @@ find_executable (const char *argv0)
     {
       const char *p;
       for (p = argv0; *p; p++)
-        if (*p == '/')
+        if (ISSLASH(*p) )
           {
             has_slash = true;
             break;
@@ -394,7 +376,7 @@ find_executable (const char *argv0)
                 else
                   {
                     memcpy (concat_name, p, p_len);
-                    concat_name[p_len] = '/';
+                    concat_name[p_len] = DIR_SEPARATOR;
                     strcpy (concat_name + p_len + 1, argv0);
                   }
                 if (maybe_executable (concat_name))

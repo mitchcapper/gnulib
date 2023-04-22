@@ -47,7 +47,7 @@
 #else
 # include "gettext.h"
 #endif
-
+#include "filename.h"
 #include "argp.h"
 #include "argp-fmtstream.h"
 #include "argp-namefrob.h"
@@ -1833,7 +1833,7 @@ char *
 __argp_short_program_name (void)
 {
 # if HAVE_DECL_PROGRAM_INVOCATION_NAME
-  char *name = strrchr (program_invocation_name, '/');
+  char *name = LAST_SLASH_IN_PATH(program_invocation_name);
   return name ? name + 1 : program_invocation_name;
 # else
   /* FIXME: What now? Miles suggests that it is better to use NULL,

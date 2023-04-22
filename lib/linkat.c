@@ -32,6 +32,7 @@
 #include "eloop-threshold.h"
 #include "filenamecat.h"
 #include "openat-priv.h"
+#include "filename.h"
 
 #if !HAVE_LINKAT || LINKAT_SYMLINK_NOTSUP
 
@@ -278,8 +279,8 @@ rpl_linkat (int fd1, char const *file1, int fd2, char const *file2, int flag)
   {
     size_t len1 = strlen (file1);
     size_t len2 = strlen (file2);
-    if ((len1 && file1[len1 - 1] == '/')
-        || (len2 && file2[len2 - 1] == '/'))
+    if ((len1 && ISSLASH(file1[len1 - 1]) )
+        || (len2 && ISSLASH(file2[len2 - 1])))
       {
         /* Let linkat() decide whether hard-linking directories is legal.
            If fstatat() fails, then linkat() should fail for the same reason;

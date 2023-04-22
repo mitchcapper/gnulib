@@ -30,13 +30,7 @@
 #include "filename.h"
 #include "concat-filename.h"
 
-#if (defined _WIN32 && !defined __CYGWIN__) || defined __EMX__ || defined __DJGPP__
-  /* Native Windows, OS/2, DOS */
-# define NATIVE_SLASH '\\'
-#else
-  /* Unix */
-# define NATIVE_SLASH '/'
-#endif
+# define NATIVE_SLASH DIR_SEPARATOR
 
 /* Separator in PATH like lists of pathnames.  */
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __EMX__ || defined __DJGPP__

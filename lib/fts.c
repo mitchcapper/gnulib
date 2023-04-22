@@ -67,7 +67,7 @@ static char sccsid[] = "@(#)fts.c       8.6 (Berkeley) 8/14/94";
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include "filename.h"
 #if ! _LIBC
 # include "attribute.h"
 # include "fcntl--.h"
@@ -473,8 +473,8 @@ fts_open (char * const *argv,
                     /* If there are two or more trailing slashes, trim all but one,
                        but don't change "//" to "/", and do map "///" to "/".  */
                     char const *v = *argv;
-                    if (2 < len && v[len - 1] == '/')
-                      while (1 < len && v[len - 2] == '/')
+                    if (2 < len && ISSLASH(v[len - 1]))
+                      while (1 < len && ISSLASH(v[len - 2]))
                         --len;
                   }
 
@@ -563,7 +563,7 @@ fts_load (FTS *sp, register FTSENT *p)
          */
         len = p->fts_pathlen = p->fts_namelen;
         memmove(sp->fts_path, p->fts_name, len + 1);
-        if ((cp = strrchr(p->fts_name, '/')) && (cp != p->fts_name || cp[1])) {
+		if ((cp = LAST_SLASH_IN_PATH(p->fts_name)) && (cp != p->fts_name || cp[1])) {
                 len = strlen(++cp);
                 memmove(p->fts_name, cp, len + 1);
                 p->fts_namelen = len;
@@ -832,7 +832,7 @@ leaf_optimization (_GL_UNUSED FTSENT const *p, _GL_UNUSED int dir_fd)
  * appended which would cause file names to be written as "....//foo".
  */
 #define NAPPEND(p)                                                      \
-        (p->fts_path[p->fts_pathlen - 1] == '/'                         \
+        (ISSLASH(p->fts_path[p->fts_pathlen - 1])                      \
             ? p->fts_pathlen - 1 : p->fts_pathlen)
 
 FTSENT *
@@ -1006,7 +1006,7 @@ next:   tmp = p;
                 }
 
 name:           t = sp->fts_path + NAPPEND(p->fts_parent);
-                *t++ = '/';
+                *t++ = DIR_SEPARATOR;
                 memmove(t, p->fts_name, p->fts_namelen + 1);
 check_for_dir:
                 sp->fts_cur = p;
@@ -1159,7 +1159,7 @@ fts_children (register FTS *sp, int instr)
          * directory is, so we can't get back so that the upcoming chdir by
          * fts_read will work.
          */
-        if (p->fts_level != FTS_ROOTLEVEL || p->fts_accpath[0] == '/' ||
+        if (p->fts_level != FTS_ROOTLEVEL || IS_ABSOLUTE_FILE_NAME(p->fts_accpath) ||
             ISSET(FTS_NOCHDIR))
                 return (sp->fts_child = fts_build(sp, instr));
 
@@ -1423,7 +1423,7 @@ fts_build (register FTS *sp, int type)
         len = NAPPEND(cur);
         if (ISSET(FTS_NOCHDIR)) {
                 cp = sp->fts_path + len;
-                *cp++ = '/';
+                *cp++ = DIR_SEPARATOR;
         } else {
                 /* GCC, you're too verbose. */
                 cp = NULL;

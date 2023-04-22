@@ -47,6 +47,7 @@ orig_creat (const char *filename, mode_t mode)
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
+#include "filename.h"
 
 int
 creat (const char *filename, mode_t mode)
@@ -67,7 +68,7 @@ creat (const char *filename, mode_t mode)
      creat() must fail since creat() cannot create directories.  */
   {
     size_t len = strlen (filename);
-    if (len > 0 && filename[len - 1] == '/')
+    if (len > 0 && ISSLASH(filename[len - 1]))
       {
         errno = EISDIR;
         return -1;

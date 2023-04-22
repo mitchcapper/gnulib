@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stddef.h>
-
+#include "filename.h"
 #include <fcntl.h> /* For AT_FDCWD on Solaris 9.  */
 
 /* If this host provides the openat function or if we're using the
@@ -319,7 +319,7 @@ __getcwd_generic (char *buf, size_t size)
       dirstream = __opendir (dotlist);
       if (dirstream == NULL)
         goto lose;
-      dotlist[dotlen++] = '/';
+      dotlist[dotlen++] = DIR_SEPARATOR;
 #endif
       for (;;)
         {
@@ -396,7 +396,7 @@ __getcwd_generic (char *buf, size_t size)
                   {
                     dotlist[i++] = '.';
                     dotlist[i++] = '.';
-                    dotlist[i++] = '/';
+                    dotlist[i++] = DIR_SEPARATOR;
                   }
                 while (i < dotlen);
               }
@@ -445,7 +445,7 @@ __getcwd_generic (char *buf, size_t size)
         }
       dirp -= namlen;
       memcpy (dirp, d->d_name, namlen);
-      *--dirp = '/';
+      *--dirp = DIR_SEPARATOR;
 
       thisdev = dotdev;
       thisino = dotino;
@@ -525,7 +525,7 @@ __getcwd_generic (char *buf, size_t size)
     }
 
   if (dirp == &dir[allocated - 1])
-    *--dirp = '/';
+    *--dirp = DIR_SEPARATOR;
 
 #if ! HAVE_OPENAT_SUPPORT
   if (dotlist != dots)

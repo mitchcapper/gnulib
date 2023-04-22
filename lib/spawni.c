@@ -1028,7 +1028,7 @@ __spawni (pid_t *pid, const char *file,
         }
     }
 
-  if (! use_path || strchr (file, '/') != NULL)
+  if (! use_path || IS_FILE_NAME_WITH_DIR(file))
     {
       /* The FILE parameter is actually a path.  */
       execve (file, (char * const *) argv, (char * const *) envp);
@@ -1061,7 +1061,7 @@ __spawni (pid_t *pid, const char *file,
   /* Copy the file name at the top.  */
   name = (char *) memcpy (name + pathlen + 1, file, len);
   /* And add the slash.  */
-  *--name = '/';
+  *--name = DIR_SEPARATOR;
 
   p = path;
   do
