@@ -64,7 +64,7 @@ concatenated_filename (const char *directory, const char *filename,
       memcpy (result, directory, directory_len);
       p = result + directory_len;
       if (need_slash)
-        *p++ = DIR_SEPERATOR;
+        *p++ = DIR_SEPARATOR;
     }
   p = stpcpy (p, filename);
   if (suffix != NULL)

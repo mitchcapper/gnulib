@@ -1386,7 +1386,7 @@ glob_in_dir (const char *pattern, const char *directory, int flags,
                             && !scratch_buffer_set_array_size (&s, need, 1))
                           goto memory_error;
                         char *p = mempcpy (s.data, directory, dirlen);
-                        *p = DIR_SEPERATOR;
+                        *p = DIR_SEPARATOR;
                         p += ISSLASH(p[-1]);
                         memcpy (p, d.name, namelen + 1);
                         if (! is_dir (s.data, flags, pglob))

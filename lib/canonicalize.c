@@ -240,13 +240,13 @@ canonicalize_filename_mode_stk (const char *name, canonicalize_mode_t can_mode,
   else
     {
       dest = mempcpy (rname, name, prefix_len);
-      *dest++ = DIR_SEPERATOR;
+      *dest++ = DIR_SEPARATOR;
       if (DOUBLE_SLASH_IS_DISTINCT_ROOT)
         {
           if (prefix_len == 0 /* implies ISSLASH (name[0]) */
               && ISSLASH (name[1]) && !ISSLASH (name[2]))
             {
-              *dest++ = DIR_SEPERATOR;
+              *dest++ = DIR_SEPARATOR;
 #if defined _WIN32 && !defined __CYGWIN__
               /* For UNC file names '\\server\path\to\file', extend the prefix
                  to include the server: '\\server\'.  */
@@ -308,7 +308,7 @@ canonicalize_filename_mode_stk (const char *name, canonicalize_mode_t can_mode,
       else
         {
           if (!ISSLASH (dest[-1]))
-            *dest++ = DIR_SEPERATOR;
+            *dest++ = DIR_SEPARATOR;
 
           while (rname + bufs->rname.length - dest
                  < startlen + sizeof dir_suffix)
@@ -399,11 +399,11 @@ canonicalize_filename_mode_stk (const char *name, canonicalize_mode_t can_mode,
                   idx_t pfxlen = FILE_SYSTEM_PREFIX_LEN (buf);
 
                   dest = mempcpy (rname, buf, pfxlen);
-                  *dest++ = DIR_SEPERATOR; /* It's an absolute symlink */
+                  *dest++ = DIR_SEPARATOR; /* It's an absolute symlink */
                   if (DOUBLE_SLASH_IS_DISTINCT_ROOT)
                     {
                       if (ISSLASH (buf[1]) && !ISSLASH (buf[2]) && !pfxlen)
-                        *dest++ = DIR_SEPERATOR;
+                        *dest++ = DIR_SEPARATOR;
                       *dest = '\0';
                     }
                   /* Install the new prefix to be in effect hereafter.  */
