@@ -113,7 +113,7 @@ rpl_fstatat (int fd, char const *file, struct stat *st, int flag)
 static int
 stat_func (char const *name, struct stat *st)
 {
-  return stat (name, st);
+  return lstat (name, st);
 }
 
 /* Likewise, if there is no native 'lstat', then the gnulib

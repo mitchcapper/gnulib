@@ -45,6 +45,8 @@ ftypelet (mode_t bits)
   /* These are the most common, so test for them first.  */
   if (S_ISREG (bits))
     return '-';
+  if (S_ISLNK (bits)) //must go before dir as windows has symlink dirs
+    return 'l';
   if (S_ISDIR (bits))
     return 'd';
 
@@ -53,8 +55,6 @@ ftypelet (mode_t bits)
     return 'b';
   if (S_ISCHR (bits))
     return 'c';
-  if (S_ISLNK (bits))
-    return 'l';
   if (S_ISFIFO (bits))
     return 'p';
 
