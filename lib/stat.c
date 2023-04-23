@@ -117,7 +117,10 @@ rpl_stat(char const* name, struct stat* buf)
 int
 lstat(char const* name, struct stat* buf)
 {
-	return _rpl_stat(name, buf, 1);
+	int do_lstat = 1;
+	if (*name && ISSLASH(name[strlen(name) - 1]))//if it ends in a slash always resolve as a directory not the symlink by forrcing normal stat mode
+		do_lstat = 0;
+	return _rpl_stat(name, buf, do_lstat);
 
 }
 int
