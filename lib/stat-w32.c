@@ -260,17 +260,18 @@ _gl_fstat_by_handle (HANDLE h, const char *path, struct stat *buf)
       buf->st_ino = 0;
 #endif
 
+	  int is_sym_link = info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
       /* st_mode.  */
       unsigned int mode =
         /* XXX How to handle FILE_ATTRIBUTE_REPARSE_POINT ?  */
         ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? _S_IFDIR | S_IEXEC_UGO : 0)
         | S_IREAD_UGO
-		| (info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT ? S_IFLNK : 0)
+		| (is_sym_link ? S_IFLNK : 0)
         | ((info.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? 0 : S_IWRITE_UGO);
-	  if (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY || info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT))
+	  if (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY || is_sym_link))
 		  mode |= _S_IFREG;
 
-      if (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+      if (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && !is_sym_link))
         {
           /* Determine whether the file is executable by looking at the file
              name suffix.
