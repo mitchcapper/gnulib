@@ -76,7 +76,7 @@ typedef struct _REPARSE_DATA_BUFFER {
 // https://github.com/joyent/libuv/blob/1dc2709b999a84520ab1b3c56c0e082bf8617c1f/src/win/fs.c#L971
 ssize_t readlink(char const* file, char* target,
 	size_t target_len) {
-	HANDLE handle = CreateFileA(file, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, NULL);
+	HANDLE handle = CreateFileA(file, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);//need FILE_FLAG_BACKUP_SEMANTICS  to be able to open directory ssymlinks
 
 	char buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
 	REPARSE_DATA_BUFFER* reparse_data = (REPARSE_DATA_BUFFER*)buffer;
