@@ -1825,6 +1825,8 @@ fts_stat(FTS *sp, register FTSENT *p, bool follow)
             return FTS_NS;
           }
 
+		if (S_ISLNK(sbp->st_mode))//must be before S_ISDIR due to windows having specific directory sym links
+			return (FTS_SL);
         if (S_ISDIR(sbp->st_mode)) {
                 if (ISDOT(p->fts_name)) {
                         /* Command-line "." and ".." are real directories. */
@@ -1833,8 +1835,7 @@ fts_stat(FTS *sp, register FTSENT *p, bool follow)
 
                 return (FTS_D);
         }
-        if (S_ISLNK(sbp->st_mode))
-                return (FTS_SL);
+
         if (S_ISREG(sbp->st_mode))
                 return (FTS_F);
         return (FTS_DEFAULT);

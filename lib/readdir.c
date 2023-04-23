@@ -77,10 +77,11 @@ readdir (DIR *dirp)
 
   dirp->status = 0;
 
-  if (dirp->entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-    type = DT_DIR;
-  else if (dirp->entry.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+
+  if (dirp->entry.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) //linux shows sym l inked directories as symlinks not as directories
     type = DT_LNK;
+  else if (dirp->entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	  type = DT_DIR;
   else if ((dirp->entry.dwFileAttributes
             & ~(FILE_ATTRIBUTE_READONLY
                 | FILE_ATTRIBUTE_HIDDEN
