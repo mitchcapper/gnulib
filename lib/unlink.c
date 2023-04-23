@@ -93,6 +93,18 @@ rpl_unlink (char const *name)
         }
 #endif
       result = unlink (name);
+#ifdef _WIN32 //here we fix unlinking of symlinked directories, 
+	  if (result && errno == EACCES) {
+		  struct stat st;
+		  result = lstat(name, &st);
+		  if (!result && S_ISLNK(st.st_mode) && S_ISDIR(st.st_mode))
+			  result = _rmdir(name);
+		  else {
+			  result = -1;
+			  errno = EACCES;//restore orig errno
+    }
+	  }
+#endif
     }
   return result;
 }
