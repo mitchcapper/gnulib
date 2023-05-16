@@ -39,11 +39,11 @@ c_file_type (struct stat const *st)
   if (S_ISREG (st->st_mode))
     return st->st_size == 0 ? N_("regular empty file") : N_("regular file");
 
+  if (S_ISLNK (st->st_mode)) //must go before directory for windows directories that are symlinks
+    return N_("symbolic link");
+
   if (S_ISDIR (st->st_mode))
     return N_("directory");
-
-  if (S_ISLNK (st->st_mode))
-    return N_("symbolic link");
 
   /* Do the S_TYPEIS* macros next, as they may be implemented in terms
      of S_ISNAM, and we want the more-specialized interpretation.  */
