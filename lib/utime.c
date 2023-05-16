@@ -96,6 +96,7 @@ _gl_utimens_windows (const char *name, struct timespec ts[2])
                 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
                 NULL,
                 OPEN_EXISTING,
+                FILE_FLAG_OPEN_REPARSE_POINT | //If it is not a reparse point this is ignored, this allows us to modify the reparse point itself
                 /* FILE_FLAG_POSIX_SEMANTICS (treat file names that differ only
                    in case as different) makes sense only when applied to *all*
                    filesystem operations.  */

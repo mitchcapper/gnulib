@@ -672,7 +672,9 @@ lutimens (char const *file, struct timespec const timespec[2])
   /* Out of luck for symlinks, but we still handle regular files.  */
   if (!(adjustment_needed || REPLACE_FUNC_STAT_FILE) && lstat (file, &st))
     return -1;
+#ifndef _WIN32
   if (!S_ISLNK (st.st_mode))
+#endif // !_WIN32
     return fdutimens (-1, file, ts);
   errno = ENOSYS;
   return -1;
