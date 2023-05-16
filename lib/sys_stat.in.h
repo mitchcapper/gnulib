@@ -260,6 +260,9 @@ struct stat
 #undef S_IFMT
 #define S_IFMT (_S_IFMT | S_IFLNK)
 #define S_ISLNK(m) (((m) & S_IFMT) == S_IFLNK)
+#define S_ISHARDDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#undef S_ISDIR
+#define S_ISDIR(m) (((m) & (S_IFMT ^ S_IFLNK)) == S_IFDIR)
 
 #endif
 
