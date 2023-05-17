@@ -903,7 +903,6 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
           goto normal_match;
 
         case L_('/'):
-		case L_(DIR_SEPARATOR):
           if (NO_LEADING_PERIOD (flags))
             {
               if (n == string_end || c != (UCHAR) *n)
