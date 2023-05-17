@@ -89,7 +89,7 @@ link (const char *file1, const char *file2)
   /* Reject trailing slashes on non-directories; native Windows does not
      support hard-linking directories.  */
   if ((len1 && ISSLASH(file1[len1 - 1]))
-      || (len2 && ISSLASH(file2[len2 - 1]))
+      || (len2 && ISSLASH(file2[len2 - 1])))
     {
       /* If stat() fails, then link() should fail for the same reason.  */
       struct stat st;
