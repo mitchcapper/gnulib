@@ -45,11 +45,6 @@
 # define DOUBLE_SLASH_IS_DISTINCT_ROOT false
 #endif
 
-#if ISSLASH ('\\')
-# define SLASHES "/\\"
-#else
-# define SLASHES "/"
-#endif
 
 /* Avoid false GCC warning "'end_idx' may be used uninitialized".  */
 #if _GL_GNUC_PREREQ (4, 7)
