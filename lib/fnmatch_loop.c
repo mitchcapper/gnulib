@@ -155,7 +155,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
                     result = 0;
                   else
                     {
-                      if (MEMCHR (n, L_('/'), string_end - n) == NULL && MEMCHR(n, L_(DIR_SEPARATOR), string_end - n) == NULL)
+                      if (MEMCHR (n, L_('/'), string_end - n) == NULL && MEMCHR(n, DIR_SEPARATOR, string_end - n) == NULL)
                         result = 0;
                     }
                 }
@@ -168,7 +168,7 @@ FCT (const CHAR *pattern, const CHAR *string, const CHAR *string_end,
               struct STRUCT end;
 
               end.pattern = NULL;
-              endp = MEMCHR (n, (flags & FNM_FILE_NAME) ? L_(DIR_SEPARATOR) : L_('\0'),
+              endp = MEMCHR (n, (flags & FNM_FILE_NAME) ? DIR_SEPARATOR : L_('\0'),
                              string_end - n);
 			  if (endp == NULL && (flags & FNM_FILE_NAME) && DIR_SEPARATOR != '/')
 				  endp = MEMCHR(n, L_('/'), string_end - n);
