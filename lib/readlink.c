@@ -42,8 +42,10 @@ readlink (char const *file, _GL_UNUSED char *buf,
   return -1;
 }
 #else
-
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include <ioapiset.h>
+#include <winioctl.h>
 #define __extension__
 #define _ANONYMOUS_UNION	__extension__
 typedef struct _REPARSE_DATA_BUFFER {
