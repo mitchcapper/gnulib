@@ -71,9 +71,10 @@ char *
 getuser (uid_t uid)
 {
 #ifdef _WIN32
-  const char * user = getenv("USERNAME");
-  char * ret = xmalloc ( (strlen (user) + 1)*sizeof(char));
-  strcpy (ret, user);
+  DWORD len = 1024* sizeof(char);
+  char * ret = xmalloc ( 1024 * sizeof(char));
+  if (! GetUserName(ret, &len)) //len is not bytes but number of chars
+    return NULL;
   return ret;
 
 #else
