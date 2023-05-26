@@ -1,6 +1,10 @@
 #! /bin/sh
 # Wrapper for compilers which do not understand '-c -o'.
 
+if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
+  	echo "GNU COMPILE INPUT: " "$@" 1>&2
+fi
+
 scriptversion=2025-02-03.05; # UTC
 
 # Copyright (C) 1999-2025 Free Software Foundation, Inc.
@@ -240,6 +244,9 @@ func_cl_wrapper ()
   done
   if test -n "$linker_opts"; then
     linker_opts="-link$linker_opts"
+  fi
+  if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
+  	echo "GNU COMPILE OUTPUT: " "$@" $linker_opts 1>&2
   fi
   exec "$@" $linker_opts
   exit 1
