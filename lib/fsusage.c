@@ -22,8 +22,7 @@
 
 #include <limits.h>
 #include <sys/types.h>
-
-#if STAT_STATVFS || STAT_STATVFS64 /* POSIX 1003.1-2001 (and later) with XSI */
+#if (STAT_STATVFS || STAT_STATVFS64) && ! _WIN32 /* POSIX 1003.1-2001 (and later) with XSI */
 # include <sys/statvfs.h>
 #else
 /* Don't include backward-compatibility files unless they're needed.
@@ -111,6 +110,22 @@ statvfs_works (void)
 int
 get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
 {
+#ifdef _WIN32
+    char root[MAX_PATH+1];
+    
+    DWORD bytes_per_sector,free_clusters,total_clusters, flags, sectors_per_cluster, volume_serial_number;
+    GetVolumePathName (file, root, MAX_PATH+1);
+    GetVolumeInformation(root, NULL, 0, &volume_serial_number, NULL, NULL, fsp->fsu_fs_type, _MAX_PATH+1);
+    GetDiskFreeSpace(root, &sectors_per_cluster, &bytes_per_sector, &free_clusters, &total_clusters);
+    fsp->fsu_blocksize = bytes_per_sector;
+    fsp->fsu_blocks = sectors_per_cluster * total_clusters;
+    fsp->fsu_bfree = fsp->fsu_bavail = sectors_per_cluster * free_clusters;
+    fsp->fsu_bavail_top_bit_set = false;
+    fsp->fsu_files = fsp->fsu_ffree = 0;
+    fsp->fsu_namemax = MAX_PATH+1;
+    fsp->fsu_fsid = volume_serial_number;
+#else
+
 #ifdef STAT_STATVFS     /* POSIX, except pre-2.6.36 glibc/Linux */
 
   if (statvfs_works ())
@@ -131,6 +146,8 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
       fsp->fsu_bavail_top_bit_set = EXTRACT_TOP_BIT (vfsd.f_bavail) != 0;
       fsp->fsu_files = PROPAGATE_ALL_ONES (vfsd.f_files);
       fsp->fsu_ffree = PROPAGATE_ALL_ONES (vfsd.f_ffree);
+      fsp->fsu_namemax = vfsd.f_namelen;
+      fsp->fsu_fsid = vfsd.f_fsid;
       return 0;
     }
 
@@ -144,6 +161,8 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
     return -1;
 
   /* f_frsize isn't guaranteed to be supported.  */
+  fsp->fsu_namemax = fsd.f_namemax;
+  fsp->fsu_fsid = fsd.f_fsid;
   fsp->fsu_blocksize = (fsd.f_frsize
                         ? PROPAGATE_ALL_ONES (fsd.f_frsize)
                         : PROPAGATE_ALL_ONES (fsd.f_bsize));
@@ -156,6 +175,7 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
     return -1;
 
   fsp->fsu_blocksize = PROPAGATE_ALL_ONES (fsd.f_fsize);
+  fsp->fsu_fs_type = fsd.f_type;
 
 #elif defined STAT_STATFS2_FRSIZE        /* 2.6 < glibc/Linux < 2.6.36 */
 
@@ -165,6 +185,7 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
     return -1;
 
   fsp->fsu_blocksize = PROPAGATE_ALL_ONES (fsd.f_frsize);
+  fsp->fsu_fs_type = fsd.f_type;
 
 #elif defined STAT_STATFS2_BSIZE        /* glibc/Linux < 2.6, 4.3BSD, SunOS 4, \
                                            Mac OS X < 10.4, FreeBSD < 5.0, \
@@ -176,6 +197,7 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
     return -1;
 
   fsp->fsu_blocksize = PROPAGATE_ALL_ONES (fsd.f_bsize);
+  fsp->fsu_fs_type = fsd.f_type;
 
 # ifdef STATFS_TRUNCATES_BLOCK_COUNTS
 
@@ -198,7 +220,7 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
 
   if (statfs (file, &fsd) < 0)
     return -1;
-
+  fsp->fsu_fs_type = fsd.f_type;
   fsp->fsu_blocksize = PROPAGATE_ALL_ONES (fsd.f_fsize);
 
 #elif defined STAT_STATFS4              /* SVR3, old Irix */
@@ -207,7 +229,7 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
 
   if (statfs (file, &fsd, sizeof fsd, 0) < 0)
     return -1;
-
+  fsp->fsu_fs_type = fsd.f_type;
   /* Empirically, the block counts on most SVR3 and SVR3-derived
      systems seem to always be in terms of 512-byte blocks,
      no matter what value f_bsize has.  */
@@ -227,7 +249,7 @@ get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp)
   fsp->fsu_ffree = PROPAGATE_ALL_ONES (fsd.f_ffree);
 
 #endif
-
+#endif
   (void) disk;  /* avoid argument-unused warning */
   return 0;
 }
