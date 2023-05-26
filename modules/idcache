@@ -9,6 +9,7 @@ m4/idcache.m4
 Depends-on:
 flexmember
 xalloc
+getlogin
 
 configure.ac:
 gl_IDCACHE
