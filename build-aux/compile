@@ -108,37 +108,66 @@ func_cl_dashL ()
   linker_opts="$linker_opts -LIBPATH:$file"
 }
 
+function GetLibNameIfInDir() {
+	local lib=$1
+	local dir=$2
+	local dir_in_libpath=$3
+	local shared=$4
+	FULL_LIB_NAME=''
+
+	local TRY_NAMES=("${lib}.lib" "${lib}lib.lib" "lib${lib}.a" "lib${lib}.lib")
+	if $shared; then
+		TRY_NAMES+="${lib}.dll.lib"; #prefer dynamic last
+		#TRY_NAMES=("$lib.dll.lib" "${TRY_NAMES[@]}");
+	else
+		TRY_NAMES=("${lib}static.lib" "${lib}libstatic.lib" "${lib}-static.lib" "${lib}lib-static.lib" "${TRY_NAMES[@]}");
+	fi
+	for name in "${TRY_NAMES[@]}"; do
+		if test -f "${dir}/${name}"; then
+			if [ $dir_in_libpath -eq 1 ]; then
+				FULL_LIB_NAME="$name"
+			else
+				FULL_LIB_NAME="${dir}/${name}"
+			fi
+			return 0;
+		fi
+	done
+}
+
 # func_cl_dashl library
 # Do a library search-path lookup for cl
 func_cl_dashl ()
 {
-  lib=$1
-  found=no
-  save_IFS=$IFS
-  IFS=';'
-  for dir in $lib_path $LIB
-  do
-    IFS=$save_IFS
-    if $shared && test -f "$dir/$lib.dll.lib"; then
-      found=yes
-      lib=$dir/$lib.dll.lib
-      break
-    fi
-    if test -f "$dir/$lib.lib"; then
-      found=yes
-      lib=$dir/$lib.lib
-      break
-    fi
-    if test -f "$dir/lib$lib.a"; then
-      found=yes
-      lib=$dir/lib$lib.a
-      break
-    fi
-  done
+	lib=$1
+	found=no
+	save_IFS=$IFS
+	IFS=';'
+	for dir in $lib_path; do
+		IFS=$save_IFS
+		GetLibNameIfInDir "$lib" "$dir" 1 "$shared"
+		if [ ! -z "$FULL_LIB_NAME" ]; then
+			break
+		fi
+	done
+	if [ -z "$FULL_LIB_NAME" ]; then
+		IFS=';'
+		for dir in $LIB; do
+			IFS=$save_IFS
+			GetLibNameIfInDir "$lib" "$dir" 0 "$shared"
+			if [ ! -z "$FULL_LIB_NAME" ]; then
+				break
+			fi
+		done
+	fi
+	if [ ! -z "$FULL_LIB_NAME" ]; then
+		found=yes
+		lib="$FULL_LIB_NAME"
+	fi
+
   IFS=$save_IFS
 
   if test "$found" != yes; then
-    lib=$lib.lib
+    lib="$lib.lib"
   fi
 }
 
