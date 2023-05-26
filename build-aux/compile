@@ -142,6 +142,7 @@ func_cl_dashl ()
 	found=no
 	save_IFS=$IFS
 	IFS=';'
+	FULL_LIB_NAME='' #incase no lib_paths we need to set this so the previous lib doesn't get used in the next check
 	for dir in $lib_path; do
 		IFS=$save_IFS
 		GetLibNameIfInDir "$lib" "$dir" 1 "$shared"
