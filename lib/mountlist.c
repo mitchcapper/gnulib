@@ -187,6 +187,10 @@
    /* for Irix 6.5 */                           \
    || strcmp (Fs_type, "ignore") == 0)
 
+#ifdef _WIN32
+#undef MOUNTED_GETFSSTAT
+#endif
+
 /* Historically, we have marked as "dummy" any file system of type "none",
    but now that programs like du need to know about bind-mounted directories,
    we grant an exception to any with "bind" in its list of mount options.
@@ -466,6 +470,101 @@ read_file_system_list (bool need_fs_type)
   struct mount_entry *me;
   struct mount_entry **mtail = &mount_list;
   (void) need_fs_type;
+  #ifdef _WIN32
+    DWORD  CharCount            = 0;
+    char  DeviceName[MAX_PATH] = "";
+    DWORD  Error                = ERROR_SUCCESS;
+    HANDLE FindHandle           = INVALID_HANDLE_VALUE;
+    BOOL   Found                = FALSE;
+    size_t Index                = 0;
+    BOOL   Success              = FALSE;
+    char  VolumeName[MAX_PATH] = "";
+    char  MountPoint[MAX_PATH] = "";
+    FindHandle = FindFirstVolumeA(VolumeName, MAX_PATH);
+ if (FindHandle == INVALID_HANDLE_VALUE)
+    {
+        Error = GetLastError();
+        printf("FindFirstVolumeW failed with error code %d\n", Error);
+        return NULL;
+    }
+  int fakedevNum=3;
+    for (;;)
+    {
+        //
+        //  Skip the \\?\ prefix and remove the trailing backslash.
+        Index = strlen(VolumeName) - 1;
+
+        if (VolumeName[0]     != L'\\' ||
+            VolumeName[1]     != L'\\' ||
+            VolumeName[2]     != L'?'  ||
+            VolumeName[3]     != L'\\' ||
+            VolumeName[Index] != L'\\') 
+        {
+            Error = ERROR_BAD_PATHNAME;
+            printf("FindFirstVolumeW/FindNextVolumeW returned a bad path: %s\n", VolumeName);
+            break;
+        }
+
+        //
+        //  QueryDosDeviceW does not allow a trailing backslash,
+        //  so temporarily remove it.
+        VolumeName[Index] = L'\0';
+
+        CharCount = QueryDosDeviceA(&VolumeName[4], DeviceName, MAX_PATH); 
+
+        VolumeName[Index] = L'\\';
+
+        if ( CharCount == 0 ) 
+        {
+            Error = GetLastError();
+            printf("QueryDosDeviceW failed with error code %d\n", Error);
+            break;
+        }
+        Success = GetVolumePathNamesForVolumeNameA(
+            VolumeName, MountPoint, MAX_PATH, &CharCount
+        );
+        
+        if (Success && strlen(MountPoint) > 0){
+        me = xmalloc (sizeof *me);
+        me->me_type = "-";
+        me->me_type_malloced=0;
+        me->me_devname = xstrdup (DeviceName);
+        me->me_mountdir = xstrdup (MountPoint);//MountPoint contains all the names but each null teriminated
+        me->me_mntroot = NULL;
+        me->me_dev = (dev_t) fakedevNum++;
+        me->me_dummy = 0;
+        me->me_remote = 0;
+        
+          *mtail = me;
+          mtail = &me->me_next;
+        }
+        //
+        //  Move on to the next volume.
+        Success = FindNextVolumeA(FindHandle, VolumeName, MAX_PATH);
+
+        if ( !Success ) 
+        {
+            Error = GetLastError();
+
+            if (Error != ERROR_NO_MORE_FILES) 
+            {
+                printf("FindNextVolumeW failed with error code %d\n", Error);
+                break;
+            }
+
+            //
+            //  Finished iterating
+            //  through all the volumes.
+            Error = ERROR_SUCCESS;
+            break;
+        }
+    }
+
+    FindVolumeClose(FindHandle);
+    FindHandle = INVALID_HANDLE_VALUE;
+    *mtail = NULL;
+    return mount_list;
+  #endif
 
 #ifdef MOUNTED_GETMNTENT1       /* glibc, HP-UX, IRIX, Cygwin, Android,
                                    also (obsolete) 4.3BSD, SunOS */
