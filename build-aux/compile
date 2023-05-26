@@ -120,7 +120,7 @@ function GetLibNameIfInDir() {
 		TRY_NAMES+="${lib}.dll.lib"; #prefer dynamic last
 		#TRY_NAMES=("$lib.dll.lib" "${TRY_NAMES[@]}");
 	else
-		TRY_NAMES=("${lib}static.lib" "${lib}libstatic.lib" "${lib}-static.lib" "${lib}lib-static.lib" "${TRY_NAMES[@]}");
+		TRY_NAMES=("${lib}static.lib" "${lib}libstatic.lib" "${lib}-static.lib" "${lib}lib-static.lib" "${lib}_static.lib" "${lib}lib_static.lib" "${TRY_NAMES[@]}");
 	fi
 	for name in "${TRY_NAMES[@]}"; do
 		if test -f "${dir}/${name}"; then
@@ -153,7 +153,8 @@ func_cl_dashl ()
 		IFS=';'
 		for dir in $LIB; do
 			IFS=$save_IFS
-			GetLibNameIfInDir "$lib" "$dir" 0 "$shared"
+			#seems like we should be able to leave off LIB dirs as cl.exe will incldue them anyway
+			GetLibNameIfInDir "$lib" "$dir" 1 "$shared"
 			if [ ! -z "$FULL_LIB_NAME" ]; then
 				break
 			fi
@@ -245,6 +246,10 @@ func_cl_wrapper ()
 	-Xlinker)
 	  eat=1
 	  linker_opts="$linker_opts $2"
+	  ;;
+	--version)
+	  echo "MSVC CL" `cl 2>&1 1>/dev/null | grep -o -E "[0-9]+[.][0-9.]+"`
+	  exit
 	  ;;
 	-*)
 	  set x "$@" "$1"
