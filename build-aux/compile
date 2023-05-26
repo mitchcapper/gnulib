@@ -1,8 +1,14 @@
 #! /bin/sh
 # Wrapper for compilers which do not understand '-c -o'.
 
+COLOR_MINOR="${COLOR_MINOR}"
+COLOR_MINOR2="${COLOR_MINOR2}"
+COLOR_MAJOR="${COLOR_MAJOR}"
+COLOR_NONE="${COLOR_NONE}"
+
+
 if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
-  	echo "GNU COMPILE INPUT: " "$@" 1>&2
+  	echo -e "${COLOR_MINOR}GNU COMPILE INPUT${COLOR_NONE}: " "$@" 1>&2
 fi
 
 scriptversion=2025-02-03.05; # UTC
@@ -193,12 +199,12 @@ func_cl_wrapper ()
 	  case $2 in
 	    *.o | *.lo | *.[oO][bB][jJ])
 	      func_file_conv "$2"
-	      set x "$@" -Fo"$file"
+	      set x "$@" -Fo${COLOR_MAJOR}"$file"${COLOR_NONE}
 	      shift
 	      ;;
 	    *)
 	      func_file_conv "$2"
-	      set x "$@" -Fe"$file"
+	      set x "$@" -Fe${COLOR_MAJOR}"$file"${COLOR_NONE}
 	      shift
 	      ;;
 	  esac
@@ -266,7 +272,7 @@ func_cl_wrapper ()
 	  ;;
 	*.c | *.cpp | *.CPP | *.lib | *.LIB | *.Lib | *.OBJ | *.obj | *.[oO])
 	  func_file_conv "$1" mingw
-	  set x "$@" "$file"
+	  set x "$@" "${COLOR_MINOR2}$file${COLOR_NONE}"
 	  shift
 	  ;;
 	*)
@@ -281,9 +287,11 @@ func_cl_wrapper ()
     linker_opts="-link$linker_opts"
   fi
   if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
-  	echo "GNU COMPILE OUTPUT: " "$@" $linker_opts 1>&2
+  	echo -e "${COLOR_MINOR}GNU COMPILE OUTPUT${COLOR_NONE}: " "$@" $linker_opts 1>&2
   fi
-  exec "$@" $linker_opts
+  shopt -s extglob
+  exec "${@//'\e'\[*([0-9;])m/}" ${linker_opts//'\e'\[*([0-9;])m/} #strip ansi color strings out
+  shopt -u extglob
   exit 1
 }
 

@@ -1,6 +1,13 @@
 #! /bin/sh
 # Wrapper for Microsoft lib.exe
 
+COLOR_MINOR="${COLOR_MINOR}"
+COLOR_MINOR2="${COLOR_MINOR2}"
+COLOR_MAJOR="${COLOR_MAJOR}"
+COLOR_NONE="${COLOR_NONE}"
+if [[ $DEBUG_GNU_LIB_WRAPPER -eq 1 ]]; then
+  	echo -e "${COLOR_MINOR}GNU LIB INPUT${COLOR_NONE}: " "$@" 1>&2
+fi
 me=ar-lib
 scriptversion=2025-02-03.05; # UTC
 
@@ -29,6 +36,15 @@ scriptversion=2025-02-03.05; # UTC
 # bugs to <bug-automake@gnu.org> or send patches to
 # <automake-patches@gnu.org>.
 
+func_ar_run ()
+{
+  if [[ $DEBUG_GNU_LIB_WRAPPER -eq 1 ]]; then
+      echo -e "${COLOR_MINOR}GNU LIB OUTPUT${COLOR_NONE}: " $AR -NOLOGO "$@" 1>&2
+  fi
+  shopt -s extglob
+  $AR -NOLOGO "${@//'\e'\[*([0-9;])m/}" || exit $? #strip ansi color strings out
+  shopt -u extglob
+}
 
 # func_error message
 func_error ()
@@ -103,7 +119,7 @@ func_at_file ()
 
   for member
   do
-    $AR -NOLOGO $operation:"$member" "$archive" || exit $?
+    func_ar_run $operation:"$member" "$archive"
   done
 }
 
@@ -220,7 +236,7 @@ if test -n "$delete"; then
         ;;
       *)
         func_file_conv "$1"
-        $AR -NOLOGO -REMOVE:"$file" "$archive" || exit $?
+        func_ar_run -REMOVE:"$file" "$archive"
         ;;
     esac
   done
@@ -238,15 +254,15 @@ elif test -n "$extract"; then
           ;;
         *)
           func_file_conv "$1"
-          $AR -NOLOGO -EXTRACT:"$file" "$archive" || exit $?
+          func_ar_run -EXTRACT:${COLOR_MAJOR}"$file"${COLOR_NONE} "$archive"
           ;;
       esac
     done
   else
-    $AR -NOLOGO -LIST "$archive" | tr -d '\r' | sed -e 's/\\/\\\\/g' \
+    func_ar_run -LIST "$archive" | tr -d '\r' | sed -e 's/\\/\\\\/g' \
       | while read member
         do
-          $AR -NOLOGO -EXTRACT:"$member" "$archive" || exit $?
+          func_ar_run -EXTRACT:"$member" "$archive"
         done
   fi
 
@@ -277,14 +293,14 @@ elif test -n "$quick$replace"; then
   done
 
   if test -n "$orig_archive"; then
-    $AR -NOLOGO -OUT:"$archive" "$orig_archive" "$@" || exit $?
+    func_ar_run -OUT:${COLOR_MAJOR}"$archive"${COLOR_NONE} ${COLOR_MAJOR}"$orig_archive"${COLOR_NONE} "$@"
   else
-    $AR -NOLOGO -OUT:"$archive" "$@" || exit $?
+    func_ar_run -OUT:${COLOR_MAJOR}"$archive"${COLOR_NONE} "$@"
   fi
 
 elif test -n "$list"; then
   if test ! -f "$orig_archive"; then
     func_error "archive not found"
   fi
-  $AR -NOLOGO -LIST "$archive" || exit $?
+  func_ar_run -LIST ${COLOR_MAJOR}"$archive"${COLOR_NONE}
 fi
