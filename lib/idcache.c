@@ -71,12 +71,7 @@ char *
 getuser (uid_t uid)
 {
 #ifdef _WIN32
-  DWORD len = 1024* sizeof(char);
-  char * ret = xmalloc ( 1024 * sizeof(char));
-  if (! GetUserName(ret, &len)) //len is not bytes but number of chars
-    return NULL;
-  return ret;
-
+  return getlogin();
 #else
   struct userid *tail;
   struct userid *match = NULL;
