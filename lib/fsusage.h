@@ -22,6 +22,17 @@
 #define FSUSAGE_H_
 
 #include <stdint.h>
+# include <stdbool.h>
+#ifdef _WIN32
+# include <stdlib.h>
+#endif
+#ifndef fsword
+# ifdef HAVE___FSWORD_T
+typedef __fsword_t fsword;
+# else
+typedef long int fsword;
+# endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +48,13 @@ struct fs_usage
   bool fsu_bavail_top_bit_set;  /* 1 if fsu_bavail represents a value < 0.  */
   uintmax_t fsu_files;          /* Total file nodes. */
   uintmax_t fsu_ffree;          /* Free file nodes. */
+  uintmax_t fsu_namemax;
+  uintmax_t fsu_fsid;
+#ifdef _WIN32
+  char fsu_fs_type[_MAX_PATH	+1];
+#else
+  fsword fsu_fs_type;
+#endif
 };
 
 int get_fs_usage (char const *file, char const *disk, struct fs_usage *fsp);
