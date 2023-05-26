@@ -222,6 +222,9 @@ func_cl_wrapper ()
 	  set x "$@" -Tp"$file"
 	  shift
 	  ;;
+	*.a)
+	  linker_opts="$linker_opts $1"
+	  ;;
 	*.c | *.cpp | *.CPP | *.lib | *.LIB | *.Lib | *.OBJ | *.obj | *.[oO])
 	  func_file_conv "$1" mingw
 	  set x "$@" "$file"
