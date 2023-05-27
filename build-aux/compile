@@ -241,6 +241,8 @@ func_cl_wrapper ()
 	-static)
 	  shared=false
 	  ;;
+	-W[a-zA-Z][a-zA-Z-][a-zA-Z-][a-zA-Z-][a-zA-Z-]*) #word based warnings other than all are not supported by msvc
+	  ;;
 	-Wl,*)
 	  arg=${1#-Wl,}
 	  save_ifs="$IFS"; IFS=','
