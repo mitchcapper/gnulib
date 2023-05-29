@@ -19,10 +19,11 @@
 /* Specification.  */
 #include <unistd.h>
 
+#include "filename.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "filename.h"
+
 
 #if HAVE_SYMLINK
 
