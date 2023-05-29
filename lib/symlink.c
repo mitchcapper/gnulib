@@ -24,7 +24,10 @@
 #include <sys/stat.h>
 
 
-#if HAVE_SYMLINK
+#if HAVE_SYMLINK || REPLACE_SYMLINK
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 # undef symlink
 
@@ -51,7 +54,7 @@ rpl_symlink (char const *contents, char const *name)
 	  return 0;
 
   errno = GetLastError();
-  if (errno == ERROR_ALREADY_EXISTS) //windows will return this if trying to link a folder and target is a folder name 
+  if (errno == ERROR_ALREADY_EXISTS) //windows will return this if trying to link a folder and target is a folder name
 	  errno = EEXIST;
   if (errno == ERROR_ACCESS_DENIED) //if passing an existing folder this will occur our fallback behavior expects EEXIST in that case
 	  errno = EEXIST;
@@ -59,7 +62,7 @@ rpl_symlink (char const *contents, char const *name)
 #else
   return symlink(contents, name);
 #endif
-  
+
 }
 
 #else /* !HAVE_SYMLINK */

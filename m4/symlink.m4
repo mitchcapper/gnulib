@@ -23,7 +23,8 @@ AC_DEFUN([gl_FUNC_SYMLINK],
 
   	  mingw*)
   	  	REPLACE_SYMLINK=1
-  	  	HAVE_SYMLINK=1
+  	  	HAVE_SYMLINK=0
+        AC_DEFINE([REPLACE_SYMLINK],[1], [Define to 1 if gnulib's symlink() replacement is used.])
   	   ;;
       *)
         HAVE_SYMLINK=0
