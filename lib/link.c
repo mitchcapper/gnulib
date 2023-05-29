@@ -114,7 +114,7 @@ link (const char *file1, const char *file2)
   {
     struct stat st;
     char *p = strchr (dir, '\0');
-    while (dir < p && ISSLASH(*--p));
+    while (dir < p && (--p) && ISSLASH(*p));
     *p = '\0';
     if (p != dir && stat (dir, &st) != 0 && errno != EOVERFLOW)
       {
