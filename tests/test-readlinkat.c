@@ -79,7 +79,7 @@ main (void)
 
   /* Now perform some cross-directory checks.  Skip everything else on
      mingw.  */
-  if (HAVE_SYMLINK)
+  if (HAVE_SYMLINK || REPLACE_SYMLINK)
     {
       const char *contents = "don't matter!";
       ssize_t exp = strlen (contents);

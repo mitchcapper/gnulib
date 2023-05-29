@@ -47,7 +47,7 @@ rpl_symlinkat (char const *contents, int fd, char const *name)
   return symlinkat (contents, fd, name);
 }
 
-#elif !HAVE_SYMLINK
+#elif !HAVE_SYMLINK && !REPLACE_SYMLINK
 /* Mingw lacks symlink, and it is more efficient to provide a trivial
    wrapper than to go through at-func.c to call rpl_symlink.  */
 
