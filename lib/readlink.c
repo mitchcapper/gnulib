@@ -79,6 +79,8 @@ typedef struct _REPARSE_DATA_BUFFER {
 ssize_t readlink(char const* file, char* target,
 	size_t target_len) {
 	HANDLE handle = CreateFileA(file, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);//need FILE_FLAG_BACKUP_SEMANTICS  to be able to open directory ssymlinks
+	if (handle == INVALID_HANDLE_VALUE)
+		return -1;
 
 	char buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
 	REPARSE_DATA_BUFFER* reparse_data = (REPARSE_DATA_BUFFER*)buffer;
@@ -94,6 +96,7 @@ ssize_t readlink(char const* file, char* target,
 		sizeof buffer,
 		&bytes,
 		NULL)) {
+		CloseHandle(handle);
 		return -1;
 	}
 
@@ -165,6 +168,7 @@ ssize_t readlink(char const* file, char* target,
 			w_target[5] == L':' &&
 			(w_target_len == 6 || w_target[6] == L'\\'))) {
 			SetLastError(ERROR_SYMLINK_NOT_SUPPORTED);
+			CloseHandle(handle);
 			return -1;
 		}
 
@@ -176,6 +180,7 @@ ssize_t readlink(char const* file, char* target,
 	else {
 		/* Reparse tag does not indicate a symlink. */
 		SetLastError(ERROR_SYMLINK_NOT_SUPPORTED);
+		CloseHandle(handle);
 		return -1;
 	}
 
@@ -189,6 +194,7 @@ ssize_t readlink(char const* file, char* target,
 		NULL,
 		NULL);
 	target[rd] = '\0';
+	CloseHandle(handle);
 	return rd;
 
 
