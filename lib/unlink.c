@@ -93,17 +93,21 @@ rpl_unlink (char const *name)
         }
 #endif
       result = unlink (name);
-#ifdef _WIN32 //here we fix unlinking of symlinked directories, 
-	  if (result && errno == EACCES) {
-		  struct stat st;
-		  result = lstat(name, &st);
-		  if (!result && S_ISLNK(st.st_mode) && S_ISDIR(st.st_mode))
-			  result = _rmdir(name);
-		  else {
-			  result = -1;
-			  errno = EACCES;//restore orig errno
+#ifdef _WIN32
+    if (result && errno == EACCES) { //windows won't let us delete readonly files by default but things like RM have already verified we wanted to delete it
+      chmod(name, _S_IREAD | _S_IWRITE);
+      result = unlink(name);
     }
-	  }
+    if (result && errno == EACCES) { //fix unlinking of symlinked dirs in windows
+      struct stat st;
+      result = lstat(name, &st);
+      if (!result && S_ISLNK(st.st_mode) && S_ISDIR(st.st_mode))
+        result = _rmdir(name);
+      else {
+        result = -1;
+        errno = EACCES;//restore orig errno
+      }
+    }
 #endif
     }
   return result;
