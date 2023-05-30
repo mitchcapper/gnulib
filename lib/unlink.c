@@ -93,13 +93,6 @@ rpl_unlink (char const *name)
         }
 #endif
       result = unlink (name);
-#ifdef _WIN32 //windows won't let us delete readonly files by default but things like RM have already verified we wanted to delete it
-	  if (result != 0 && errno == EACCES) {
-		  chmod(name, _S_IREAD | _S_IWRITE); 
-		  result = unlink(name);
-	  }
-#endif // _WIN32
-
     }
   return result;
 }
