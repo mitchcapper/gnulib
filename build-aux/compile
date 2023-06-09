@@ -59,6 +59,10 @@ func_file_conv ()
     / | /[!/]*) # absolute file, and not a UNC file
       if test -z "$file_conv"; then
 	# lazily determine how to convert abs files
+        OS_SYS=`uname -o`
+        if [[ "$OS_SYS" == "Msys" ]]; then
+            file_conv=cygwin
+        else
 	case `uname -s` in
 	  MINGW*)
 	    if test -n "$MSYSTEM" && (cygpath --version) >/dev/null 2>&1; then
@@ -81,6 +85,7 @@ func_file_conv ()
 	    file_conv=wine
 	    ;;
 	esac
+      fi
       fi
       case $file_conv/,$2, in
 	*,$file_conv,*)
