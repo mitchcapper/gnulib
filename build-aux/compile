@@ -191,6 +191,7 @@ func_cl_wrapper ()
   # Assume a capable shell
   lib_path=
   shared=:
+  STD_DECLARE=""
   linker_opts=
   for arg
   do
@@ -246,6 +247,17 @@ func_cl_wrapper ()
 	-static)
 	  shared=false
 	  ;;
+	-std=*)
+	  std="${1#-std=}"
+	  if [[ "$std" == "c99" ]]; then
+	  	std="c11"
+	  fi
+	  set x "$@" -std:"$std"
+	  if [[ "$std" == "c11" || "$std" == "c17" ]]; then #note that MSVC never supported dynamic arrays as it never supported c99 fully and c11 made them optional.  If your configure has a dynamic array test it will fail still.
+		STD_DECLARE="/Zc:__STDC__"
+	  fi
+	  shift
+	  ;;
 	-W[a-zA-Z][a-zA-Z-][a-zA-Z-][a-zA-Z-][a-zA-Z-]*) #word based warnings other than all are not supported by msvc
 	  ;;
 	-Wl,*)
@@ -261,7 +273,7 @@ func_cl_wrapper ()
 	  eat=1
 	  linker_opts="$linker_opts $2"
 	  ;;
-	--version)
+	-version | --version)
 	  echo "MSVC CL" `cl 2>&1 1>/dev/null | grep -o -E "[0-9]+[.][0-9.]+"`
 	  exit
 	  ;;
@@ -294,10 +306,10 @@ func_cl_wrapper ()
     linker_opts="-link$linker_opts"
   fi
   if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
-  	echo -e "${COLOR_MINOR}GNU COMPILE OUTPUT${COLOR_NONE}: " "$@" $linker_opts 1>&2
+  	echo -e "${COLOR_MINOR}GNU COMPILE OUTPUT${COLOR_NONE}: " "$@" $STD_DECLARE $linker_opts 1>&2
   fi
   shopt -s extglob
-  exec "${@//'\e'\[*([0-9;])m/}" ${linker_opts//'\e'\[*([0-9;])m/} #strip ansi color strings out
+  exec "${@//'\e'\[*([0-9;])m/}" $STD_DECLARE ${linker_opts//'\e'\[*([0-9;])m/} #strip ansi color strings out
   shopt -u extglob
   exit 1
 }
