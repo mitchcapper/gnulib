@@ -263,6 +263,8 @@ func_cl_wrapper ()
 	  fi
 	  shift
 	  ;;
+	-[Ff][pP][iI][cC] | -[Ff][Nn][Oo]-[Pp][Ii][Cc])
+	  ;;
 	-W[a-zA-Z][a-zA-Z-][a-zA-Z-][a-zA-Z-][a-zA-Z-]*) #word based warnings other than all are not supported by msvc
 	  ;;
 	-Wl,*)
