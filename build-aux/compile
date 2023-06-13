@@ -215,6 +215,11 @@ func_cl_wrapper ()
 	      ;;
 	  esac
 	  ;;
+	-include)
+		eat=1
+	  	set x "$@" -FI${COLOR_MINOR}"$2"${COLOR_NONE}
+	  	shift
+		;;
 	-I)
 	  eat=1
 	  func_file_conv "$2" mingw
