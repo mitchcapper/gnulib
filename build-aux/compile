@@ -1,14 +1,9 @@
 #! /bin/sh
+set -eo pipefail
+
 # Wrapper for compilers which do not understand '-c -o'.
-
-COLOR_MINOR="${COLOR_MINOR}"
-COLOR_MINOR2="${COLOR_MINOR2}"
-COLOR_MAJOR="${COLOR_MAJOR}"
-COLOR_NONE="${COLOR_NONE}"
-
-
-if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
-  	echo -e "${COLOR_MINOR}GNU COMPILE INPUT${COLOR_NONE}: " "$@" 1>&2
+if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 || -v COLOR_MAJOR ]]; then #if COLOR_MAJOR is set we want to include the wrapper so we can unset it otherwise would screw cmd output
+	. "$(dirname "$(readlink -f "$0")")/wrapper_helper.sh" "$@"
 fi
 
 scriptversion=2025-02-03.05; # UTC
@@ -259,7 +254,7 @@ func_cl_wrapper ()
 	  fi
 	  set x "$@" -std:"$std"
 	  if [[ "$std" == "c11" || "$std" == "c17" ]]; then #note that MSVC never supported dynamic arrays as it never supported c99 fully and c11 made them optional.  If your configure has a dynamic array test it will fail still.
-		STD_DECLARE="/Zc:__STDC__"
+			STD_DECLARE="/Zc:__STDC__"
 	  fi
 	  shift
 	  ;;
@@ -312,13 +307,12 @@ func_cl_wrapper ()
   if test -n "$linker_opts"; then
     linker_opts="-link$linker_opts"
   fi
-  if [[ $DEBUG_GNU_COMPILE_WRAPPER -eq 1 ]]; then
-  	echo -e "${COLOR_MINOR}GNU COMPILE OUTPUT${COLOR_NONE}: " "$@" $STD_DECLARE $linker_opts 1>&2
+  if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
+  	wrapper_exec "$@" $STD_DECLARE $linker_opts
+  else
+		exec "$@" $STD_DECLARE $linker_opts
   fi
-  shopt -s extglob
-  exec "${@//'\e'\[*([0-9;])m/}" $STD_DECLARE ${linker_opts//'\e'\[*([0-9;])m/} #strip ansi color strings out
-  shopt -u extglob
-  exit 1
+
 }
 
 eat=

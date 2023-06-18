@@ -1,0 +1,45 @@
+#!/bin/bash
+set -eo pipefail
+
+# Wrapper for compilers which do not understand '-c -o'.
+if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 || -v COLOR_MAJOR ]]; then #if COLOR_MAJOR is set we want to include the wrapper so we can unset it otherwise would screw cmd output
+	. "$(dirname "$(readlink -f "$0")")/wrapper_helper.sh" "$@"
+fi
+
+convert_from_msys_path () {
+	local WPATH=$1
+	if ! [ -z ${MSYS+x} ]; then
+		WPATH=`cygpath -m "$WPATH"`
+	fi
+	echo $WPATH
+}
+
+# with the other wrappers you can use cl or lib  as they genreally wont collide with msys but link.exe does 
+if [[ ! -v MS_LINK ]]; then
+	MS_LINK=`cygpath.exe -m "$VCToolsInstallDir"`
+	MS_LINK="${LINK_PATH}bin/HostX64/x64/link.exe"
+	if [[ ! -e "$MS_LINK" ]]; then
+		MS_LINK=`which link.exe -a | grep "MSVC" | head`
+		MS_LINK=$(convert_from_msys_path "$MS_LINK")
+	fi
+	if [[ ! -e "$MS_LINK" ]]; then
+		MS_LINK="link.exe"
+	fi
+fi
+
+for file in "$@"; do
+	if [[ $file = /[A-Za-z]/* ]]; then
+		file="${COLOR_MAJOR}\"$(convert_from_msys_path "$file")\"${COLOR_NONE}"
+	elif [[ -e "$file" ]]; then # we want to colorize above incase its the output file
+		file="${COLOR_MAJOR}\"$file\"${COLOR_NONE}"
+	fi
+	
+    set -- "$@" "$file"
+    shift
+done
+echo "HI MSLINK IS: $MS_LINK"
+if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
+	wrapper_exec "$MS_LINK" -NOLOGO "$@"
+else
+	exec "$MS_LINK" -NOLOGO "$@"
+fi

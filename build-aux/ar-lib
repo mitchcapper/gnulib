@@ -1,12 +1,10 @@
 #! /bin/sh
 # Wrapper for Microsoft lib.exe
+set -eo pipefail
 
-COLOR_MINOR="${COLOR_MINOR}"
-COLOR_MINOR2="${COLOR_MINOR2}"
-COLOR_MAJOR="${COLOR_MAJOR}"
-COLOR_NONE="${COLOR_NONE}"
-if [[ $DEBUG_GNU_LIB_WRAPPER -eq 1 ]]; then
-  	echo -e "${COLOR_MINOR}GNU LIB INPUT${COLOR_NONE}: " "$@" 1>&2
+# Wrapper for compilers which do not understand '-c -o'.
+if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 || -v COLOR_MAJOR ]]; then #if COLOR_MAJOR is set we want to include the wrapper so we can unset it otherwise would screw cmd output
+	. "$(dirname "$(readlink -f "$0")")/wrapper_helper.sh" "$@"
 fi
 me=ar-lib
 scriptversion=2025-02-03.05; # UTC
@@ -38,12 +36,11 @@ scriptversion=2025-02-03.05; # UTC
 
 func_ar_run ()
 {
-  if [[ $DEBUG_GNU_LIB_WRAPPER -eq 1 ]]; then
-      echo -e "${COLOR_MINOR}GNU LIB OUTPUT${COLOR_NONE}: " $AR -NOLOGO "$@" 1>&2
+  if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
+  	wrapper_exec $AR -NOLOGO "$@"
+  else
+		 exec $AR -NOLOGO "$@"
   fi
-  shopt -s extglob
-  $AR -NOLOGO "${@//'\e'\[*([0-9;])m/}" || exit $? #strip ansi color strings out
-  shopt -u extglob
 }
 
 # func_error message
