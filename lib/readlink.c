@@ -96,6 +96,9 @@ ssize_t readlink(char const* file, char* target,
 		sizeof buffer,
 		&bytes,
 		NULL)) {
+		errno = GetLastError();
+		if (errno == ERROR_NOT_A_REPARSE_POINT)
+			errno = EINVAL;//for linux readlink should set EINVAL if not a symbolic link
 		CloseHandle(handle);
 		return -1;
 	}
