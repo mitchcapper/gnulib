@@ -93,6 +93,7 @@ const char* strrpbrk(const char* s, const char* accept);
     (strchr ((Filename), '/') != NULL || strchr ((Filename), '\\') != NULL \
      || HAS_DEVICE (Filename))
 # define LAST_SLASH_IN_PATH(str) strrpbrk(str,SLASHES)
+# define PATH_CHAR_EQ(c1, c2) ( tolower(c1) == tolower(c2) )
 
 	//could not find a good place to put this otherwise
 	static const char* strrpbrk(const char* s, const char* accept) {
@@ -120,6 +121,7 @@ const char* strrpbrk(const char* s, const char* accept);
 # define IS_RELATIVE_FILE_NAME(Filename) (! ISSLASH ((Filename)[0]))
 # define IS_FILE_NAME_WITH_DIR(Filename) (strchr ((Filename), '/') != NULL)
 #define LAST_SLASH_IN_PATH(str) strrchr(str,SLASHES)
+#define PATH_CHAR_EQ(c1, c2) (c1 == c2)
 #endif
 
 /* Deprecated macros.  For backward compatibility with old users of the
