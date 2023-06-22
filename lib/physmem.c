@@ -398,7 +398,7 @@ physmem_available (void)
   return physmem_claimable (0.0);
 }
 
-#if DEBUG
+#if TEST
 
 # include <stdio.h>
 # include <stdlib.h>
@@ -410,7 +410,7 @@ main (void)
   exit (0);
 }
 
-#endif /* DEBUG */
+#endif /* TEST */
 
 /*
 Local Variables:
