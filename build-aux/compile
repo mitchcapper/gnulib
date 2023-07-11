@@ -121,7 +121,7 @@ function GetLibNameIfInDir() {
 	local shared=$4
 	FULL_LIB_NAME=''
 
-	local TRY_NAMES=("${lib}.lib" "${lib}lib.lib" "lib${lib}.a" "lib${lib}.lib")
+	local TRY_NAMES=("${lib}.lib" "${lib}lib.lib" "lib${lib}.a" "lib${lib}.lib" "${lib}")
 	if $shared; then
 		TRY_NAMES+="${lib}.dll.lib"; #prefer dynamic last
 		#TRY_NAMES=("$lib.dll.lib" "${TRY_NAMES[@]}");
@@ -175,7 +175,9 @@ func_cl_dashl ()
   IFS=$save_IFS
 
   if test "$found" != yes; then
-    lib="$lib.lib"
+	if [[ "$lib" != *.lib ]]; then
+    	lib="$lib.lib"
+	fi	
   fi
 }
 
