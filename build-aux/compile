@@ -217,6 +217,17 @@ func_cl_wrapper ()
 	  	set x "$@" -FI${COLOR_MINOR}"$2"${COLOR_NONE}
 	  	shift
 		;;
+	-x)
+	  eat=1
+	  LANG=$2
+	  if [[ "$LANG" == "c" ]]; then
+	  	LANG="-TC"
+	  elif [[ "$LANG" == "c++" ]]; then
+	  	LANG="-TP"
+	  fi
+	  set x "$@" "$LANG"
+	  shift
+	  ;;
 	-I)
 	  eat=1
 	  func_file_conv "$2" mingw
