@@ -468,6 +468,8 @@ poll (struct pollfd *pfd, nfds_t nfd, int timeout)
   HANDLE h, handle_array[FD_SETSIZE + 2];
   DWORD ret, wait_timeout, nhandles;
   fd_set rfds, wfds, xfds;
+  fd_set orig_rfds, orig_wfds, orig_xfds;
+  
   BOOL poll_again;
   MSG msg;
   int rc = 0;
@@ -539,6 +541,9 @@ restart:
             timeout = 0;
         }
     }
+  orig_rfds = rfds;
+  orig_wfds = wfds;
+  orig_xfds = xfds;
 
   if (select (0, &rfds, &wfds, &xfds, &tv0) > 0)
     {
@@ -575,8 +580,13 @@ restart:
         break;
     }
 
-  if (poll_again)
-    select (0, &rfds, &wfds, &xfds, &tv0);
+  if (poll_again) {
+	  rfds = orig_rfds;
+	  wfds = orig_wfds;
+	  xfds = orig_xfds;
+	  if (select(0, &rfds, &wfds, &xfds, &tv0) == SOCKET_ERROR)
+		  return -1;
+  }
 
   /* Place a sentinel at the end of the array.  */
   handle_array[nhandles] = NULL;
