@@ -359,6 +359,11 @@ compute_revents (int fd, int sought, fd_set *rfds, fd_set *wfds, fd_set *efds)
 }
 #endif /* !MinGW */
 
+#ifdef _WIN32
+#define THREAD_LOCAL static __declspec( thread )
+#else
+#define THREAD_LOCAL static thread_local
+#endif
 int
 poll (struct pollfd *pfd, nfds_t nfd, int timeout)
 {
@@ -458,7 +463,7 @@ poll (struct pollfd *pfd, nfds_t nfd, int timeout)
   return rc;
 #else
   static struct timeval tv0;
-  static HANDLE hEvent;
+	THREAD_LOCAL HANDLE hEvent; //note if you don't want to use thread local and this could be called from multiple threads you should make this a standard local var and use CloseHandle before any returns
   WSANETWORKEVENTS ev;
   HANDLE h, handle_array[FD_SETSIZE + 2];
   DWORD ret, wait_timeout, nhandles;
