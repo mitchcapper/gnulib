@@ -642,3 +642,21 @@ restart:
   return rc;
 #endif
 }
+#define MIN_TIMEOUT_FIX_MS 50
+int poll_retry(struct pollfd* pfd, nfds_t nfd, int timeout, int max_retries) {
+	DWORD startTime;
+	BOOL retryTrack = timeout > 0 && timeout != INFTIM && timeout > MIN_TIMEOUT_FIX_MS;
+	if (retryTrack)
+		startTime = GetTickCount();
+	int rc = 0;
+	for (int x = 0; x < max_retries; x++) {
+		rc = poll(pfd, nfd, timeout);
+		if (rc != 0 || !retryTrack)
+			return rc;
+		int msElapsed = GetTickCount() - startTime;
+		if (msElapsed < 0 || (timeout - MIN_TIMEOUT_FIX_MS) < msElapsed)//if it got the timing within  MIN_TIMEOUT_FIX_MS of the timer consider us good
+			return rc;
+		SleepEx(1, TRUE);
+	}
+	return rc;
+}

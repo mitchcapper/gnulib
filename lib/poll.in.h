@@ -124,7 +124,7 @@ _GL_WARN_ON_USE (poll, "poll is unportable - "
                  "use gnulib module poll for portability");
 # endif
 #endif
-
+int poll_retry(struct pollfd* pfd, nfds_t nfd, int timeout, int max_retries);
 
 #endif /* _@GUARD_PREFIX@_POLL_H */
 #endif /* _@GUARD_PREFIX@_POLL_H */
