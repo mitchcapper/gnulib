@@ -931,6 +931,7 @@ int main ()
 {
   int count = -1;
 #ifdef _MSC_VER
+  _set_error_mode(1); #1 being _OUT_TO_STDERR, disable abort/retry/ignore popup in debug mode
   _set_invalid_parameter_handler (invalid_parameter_handler);
   /* Also avoid an Abort/Retry/Ignore dialog in debug builds.
      <https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/crtsetreportmode>  */
