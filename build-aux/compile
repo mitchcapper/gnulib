@@ -189,6 +189,8 @@ func_cl_wrapper ()
   lib_path=
   shared=:
   STD_DECLARE=""
+  IS_GAS_CALL=0
+  GAS_OUTPUT_FILE=""
   linker_opts=
   for arg
   do
@@ -301,6 +303,13 @@ func_cl_wrapper ()
 	  set x "$@" -Tp "$file"
 	  shift
 	  ;;
+	*.s)
+	  IS_GAS_CALL=1
+	  GAS_OUTPUT_FILE="$1"
+	  set x "$@" "$1"
+	  GAS_OUTPUT_FILE=`echo "$GAS_OUTPUT_FILE" | sed 's|^.*[\\/]||; s|^[a-zA-Z]:||; s/\.s$/.obj/'`
+      shift
+	  ;;
 	*.a)
 	  linker_opts="$linker_opts $1"
 	  ;;
@@ -319,6 +328,23 @@ func_cl_wrapper ()
   done
   if test -n "$linker_opts"; then
     linker_opts="-link$linker_opts"
+  fi
+  if [[ $IS_GAS_CALL -eq 1 && "$AS" ]]; then
+	shift
+	local FINAL_ARR=("$AS")
+	for VAL in "$@"; do
+		case $VAL in
+				"-nologo")
+				;;
+				\/*) #strip slash commands
+				;;
+				*)
+					FINAL_ARR+=($VAL)
+				;;
+			esac
+	done
+	FINAL_ARR+=("-o" $GAS_OUTPUT_FILE)
+	set -- "${FINAL_ARR[@]}"
   fi
   if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
   	wrapper_exec "$@" $STD_DECLARE $linker_opts
