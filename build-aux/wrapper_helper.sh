@@ -24,6 +24,11 @@ fi
 
 function wrapper_exec {	
 	shopt -s extglob
+	local IS_NO_EXEC=0
+	if [[ "${1}" == "noexec" ]]; then
+		IS_NO_EXEC=1
+		shift
+	fi
 	if [[ -v GNU_BUILD_CMD_FILE ]]; then
 		LAST_PWD_FILE="${GNU_BUILD_CMD_FILE}.tmpcurdir"
 		CUR_PWD=`pwd`
@@ -36,8 +41,17 @@ function wrapper_exec {
 	if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then	
 		echo -e "${COLOR_MINOR}GNU ${CALLER_NAME} OUTPUT${COLOR_NONE}: " "$@" $STD_DECLARE $linker_opts 1>&2
 	fi
-	exec "${@//'\e'\[*([0-9;])m/}"  #strip ansi color strings out
+	declare -a WLB_RUN_CMD=("$@")
+
+	for ((i = 0; i < $#; i++)); do
+  		WLB_RUN_CMD[$i]="${WLB_RUN_CMD[$i]//'\e'\[*([0-9;])m/}" #strip ansi color strings out
+	done
 	shopt -u extglob
 
+	if [[ $IS_NO_EXEC -eq 1 ]]; then
+		"${WLB_RUN_CMD[@]}"
+	else
+		exec "${WLB_RUN_CMD[@]}"
+	fi
 }
 
