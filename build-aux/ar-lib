@@ -228,7 +228,7 @@ esac
 
 if test -n "$delete"; then
   if test ! -f "$orig_archive"; then
-    func_error "archive not found"
+    func_error "archive not found for deletion: ${orig_archive}"
   fi
   for member
   do
@@ -245,7 +245,7 @@ if test -n "$delete"; then
 
 elif test -n "$extract"; then
   if test ! -f "$orig_archive"; then
-    func_error "archive not found"
+    func_error "archive not found for extraction: ${orig_archive}"
   fi
   if test $# -gt 0; then
     for member
@@ -302,7 +302,7 @@ elif test -n "$quick$replace"; then
 
 elif test -n "$list"; then
   if test ! -f "$orig_archive"; then
-    func_error "archive not found"
+    func_error "archive not found for listing: ${orig_archive}"
   fi
   func_ar_run -LIST ${COLOR_MAJOR}"$archive"${COLOR_NONE}
 fi
