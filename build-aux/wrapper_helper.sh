@@ -5,6 +5,11 @@ shopt -s inherit_errexit
 function clear_colors {
 	unset COLOR_MINOR COLOR_MINOR2 COLOR_MAJOR COLOR_NONE
 }
+function safer_color_echo {
+	local STR="${@//\\/\\\\}"
+	#prevent escape sequences other than \e[ so we dont get accidental escapes
+	echo -e "${STR//\\\\e[/\\e[}" 1>&2
+}
 
 CALLER_NAME=`basename ${0^^}`
 if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
@@ -16,7 +21,7 @@ if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
 	else
 		clear_colors;
 	fi
-	echo -e ${COLOR_MINOR}GNU ${CALLER_NAME} INPUT${COLOR_NONE}: "$@" 1>&2
+	safer_color_echo "${COLOR_MINOR}GNU ${CALLER_NAME} INPUT${COLOR_NONE}: $@"
 else
 	clear_colors;
 fi
@@ -39,7 +44,7 @@ function wrapper_exec {
 		echo -e "${@//'\e'\[*([0-9;])m/}" >> "$GNU_BUILD_CMD_FILE"
 	fi
 	if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then	
-		echo -e "${COLOR_MINOR}GNU ${CALLER_NAME} OUTPUT${COLOR_NONE}: " "$@" $STD_DECLARE $linker_opts 1>&2
+		safer_color_echo "${COLOR_MINOR}GNU ${CALLER_NAME} OUTPUT${COLOR_NONE}: $@"
 	fi
 	declare -a WLB_RUN_CMD=("$@")
 

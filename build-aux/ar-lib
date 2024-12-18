@@ -120,7 +120,7 @@ func_at_file ()
 
   for member
   do
-    func_ar_run $operation:"$member" "$archive"
+    func_ar_run $operation:"${COLOR_MINOR2}$member${COLOR_NONE}" "$archive"
   done
 }
 
@@ -263,7 +263,7 @@ elif test -n "$extract"; then
     func_ar_run -LIST "$archive" | tr -d '\r' | sed -e 's/\\/\\\\/g' \
       | while read member
         do
-          func_ar_run -EXTRACT:"$member" "$archive"
+          func_ar_run -EXTRACT:${COLOR_MINOR2}"$member"${COLOR_NONE} "$archive"
         done
   fi
 
