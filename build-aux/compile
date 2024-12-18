@@ -325,6 +325,8 @@ func_cl_wrapper ()
 				;;
 				\/*) #strip slash commands
 				;;
+				-D*) #any defines
+				;;
 				*)
 					FINAL_ARR+=($VAL)
 				;;
