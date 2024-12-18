@@ -2,7 +2,6 @@
 # Wrapper for Microsoft lib.exe
 set -eo pipefail
 
-# Wrapper for compilers which do not understand '-c -o'.
 if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 || -v COLOR_MAJOR ]]; then #if COLOR_MAJOR is set we want to include the wrapper so we can unset it otherwise would screw cmd output
 	. "$(dirname "$(readlink -f "$0")")/wrapper_helper.sh" "$@"
 fi
@@ -37,9 +36,9 @@ scriptversion=2025-02-03.05; # UTC
 func_ar_run ()
 {
   if [[ $GNU_BUILD_WRAPPER_DEBUG -eq 1 ]]; then
-  	wrapper_exec $AR -NOLOGO "$@"
+  	wrapper_exec noexec $AR -NOLOGO "$@"
   else
-		 exec $AR -NOLOGO "$@"
+    $AR -NOLOGO "$@"
   fi
 }
 
