@@ -119,8 +119,8 @@ static_assert (DT_UNKNOWN != DT_FIFO && DT_UNKNOWN != DT_CHR
 /* Conversion from a 'stat' mode to a DT_* value.  */
 #ifndef IFTODT
 # define IFTODT(mode) \
-   (S_ISREG (mode) ? DT_REG : S_ISDIR (mode) ? DT_DIR \
-    : S_ISLNK (mode) ? DT_LNK : S_ISBLK (mode) ? DT_BLK \
+   (S_ISREG (mode) ? DT_REG : S_ISLNK (mode) ? DT_LNK \
+    : S_ISDIR (mode) ? DT_DIR : S_ISBLK (mode) ? DT_BLK \
     : S_ISCHR (mode) ? DT_CHR : S_ISFIFO (mode) ? DT_FIFO \
     : S_ISSOCK (mode) ? DT_SOCK \
     : _GL_DIRENT_S_ISWHT (mode) ? DT_WHT : DT_UNKNOWN)
@@ -128,8 +128,8 @@ static_assert (DT_UNKNOWN != DT_FIFO && DT_UNKNOWN != DT_CHR
 /* Conversion from a DT_* value to a 'stat' mode.  */
 #ifndef DTTOIF
 # define DTTOIF(dirtype) \
-   ((dirtype) == DT_REG ? S_IFREG : (dirtype) == DT_DIR ? S_IFDIR \
-    : (dirtype) == DT_LNK ? S_IFLNK : (dirtype) == DT_BLK ? S_IFBLK \
+   ((dirtype) == DT_REG ? S_IFREG : (dirtype) == DT_LNK ? S_IFLNK \
+    : (dirtype) == DT_DIR ? S_IFDIR : (dirtype) == DT_BLK ? S_IFBLK \
     : (dirtype) == DT_CHR ? S_IFCHR :  dirtype == DT_FIFO ? S_IFIFO \
     : (dirtype) == DT_SOCK ? S_IFSOCK \
     : (dirtype) == DT_WHT ? _GL_DIRENT_S_IFWHT \
