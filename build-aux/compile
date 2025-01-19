@@ -340,6 +340,8 @@ func_cl_wrapper ()
 				;;
 				-D*) #any defines
 				;;
+				-std*) #no std lib specs
+				;;
 				*)
 					FINAL_ARR+=($VAL)
 				;;
