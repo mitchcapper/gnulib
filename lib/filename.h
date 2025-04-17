@@ -120,7 +120,7 @@ const char* strrpbrk(const char* s, const char* accept);
 # define IS_ABSOLUTE_FILE_NAME(Filename) ISSLASH ((Filename)[0])
 # define IS_RELATIVE_FILE_NAME(Filename) (! ISSLASH ((Filename)[0]))
 # define IS_FILE_NAME_WITH_DIR(Filename) (strchr ((Filename), '/') != NULL)
-#define LAST_SLASH_IN_PATH(str) strrchr(str,SLASHES)
+#define LAST_SLASH_IN_PATH(str) strrchr(str,DIR_SEPARATOR)
 #define PATH_CHAR_EQ(c1, c2) (c1 == c2)
 #endif
 
